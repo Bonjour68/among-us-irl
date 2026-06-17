@@ -320,7 +320,8 @@
     <div class="divider"></div>
     <div class="section-title">Rôles révélés</div>
     <div id="end-roles-list"></div>
-    <button class="btn btn-primary" onclick="showScreen('screen-home')" style="margin-top:24px">🏠 Accueil</button>
+    <button class="btn btn-success" onclick="replayGame()" style="margin-top:24px" id="btn-replay">🔄 Rejouer</button>
+    <button class="btn btn-secondary" onclick="showScreen('screen-home')" style="margin-top:10px">🏠 Accueil</button>
   </div>
 </div>
 
@@ -436,13 +437,21 @@ window.joinGame = async () => {
   if (data.status!=='lobby') return toast('Partie déjà commencée.');
 
   const players = data.players||{};
-  if (!players[state.uid]) {
+  const alreadyIn = players[state.uid];
+  if (!alreadyIn) {
     const colorIdx = Object.keys(players).length;
     const me = { uid:state.uid, name, role:null, alive:true, isOrganizer:false, myTasks:[], emergenciesLeft:data.config.meetings, colorIdx };
     await updateDoc(doc(db,'games',code), { [`players.${state.uid}`]: me });
+  } else {
+    // Déjà dans la partie (ex: organisateur qui rejoint son propre code)
+    // Mettre à jour le nom si différent
+    if (alreadyIn.name !== name) {
+      await updateDoc(doc(db,'games',code), { [`players.${state.uid}.name`]: name });
+    }
   }
 
-  state.gameId=code; state.gameCode=code; state.isOrganizer=false;
+  state.gameId=code; state.gameCode=code;
+  state.isOrganizer = alreadyIn?.isOrganizer || false;
   setupLobbyUI();
   subscribeGame();
 };
@@ -502,10 +511,24 @@ function renderPlayers(list) {
             <div class="player-name">${p.name}</div>
             <div class="player-status">${p.isOrganizer?'Organisateur':'Joueur'}</div>
           </div>
-          ${p.isOrganizer?'<span class="player-badge badge-org">ORGA</span>':''}
+          ${p.isOrganizer
+            ? '<span class="player-badge badge-org">ORGA</span>'
+            : (state.isOrganizer ? `<button onclick="kickPlayer('${p.uid}')" style="background:var(--accent2);border:none;color:#fff;padding:5px 10px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer">✕ Kick</button>` : '')
+          }
         </div>`).join('')
     : '<p style="color:var(--text2);font-size:14px">Aucun joueur…</p>';
 }
+
+window.kickPlayer = async uid => {
+  if(!confirm('Virer ce joueur ?')) return;
+  const snap = await getDoc(gameRef());
+  const players = {...snap.data().players};
+  delete players[uid];
+  // Recalculer les colorIdx
+  Object.values(players).forEach((p,i) => p.colorIdx = i);
+  await updateDoc(gameRef(), { players });
+  toast('Joueur retiré.');
+};
 
 // ── Config tâches / zones ────────────────────────────────────────────
 function renderTasksConfig(tasks) {
@@ -650,10 +673,31 @@ window.doTask = async idx => {
   const me=data.players[state.uid]; if(!me||!me.alive) return;
   const tasks=[...(me.myTasks||[])]; if(tasks[idx].done) return;
   tasks[idx].done=true;
+
+  // Imposteurs peuvent cocher des tâches (pour bluffer) mais ça ne compte pas
+  const isImpostor = me.role === 'impostor';
   let completed=0;
-  Object.entries(data.players).forEach(([uid,p])=>{ completed+=(uid===state.uid?tasks:(p.myTasks||[])).filter(x=>x.done).length; });
-  await updateDoc(gameRef(),{[`players.${state.uid}.myTasks`]:tasks,'progress.completed':completed});
-  if(completed>=data.progress.total) await updateDoc(gameRef(),{status:'ended',endReason:'tasks_complete',winner:'innocents'});
+  Object.entries(data.players).forEach(([uid,p])=>{
+    if(p.role === 'impostor') return; // On ignore les tâches des imposteurs
+    const t = uid===state.uid ? tasks : (p.myTasks||[]);
+    completed += t.filter(x=>x.done).length;
+  });
+
+  // Total = somme des tâches assignées aux non-imposteurs seulement
+  const totalInnocentTasks = Object.values(data.players)
+    .filter(p => p.role !== 'impostor')
+    .reduce((sum,p) => sum + (p.uid===state.uid ? tasks : (p.myTasks||[])).length, 0);
+
+  await updateDoc(gameRef(),{
+    [`players.${state.uid}.myTasks`]:tasks,
+    'progress.completed': isImpostor ? data.progress.completed : completed,
+    'progress.total': totalInnocentTasks
+  });
+
+  // Victoire innocents seulement si tous les innocents ont fini toutes leurs tâches
+  if(!isImpostor && completed >= totalInnocentTasks && totalInnocentTasks > 0) {
+    await updateDoc(gameRef(),{status:'ended',endReason:'tasks_complete',winner:'innocents'});
+  }
 };
 
 function runTimer(startedAt,durationMin) {
@@ -803,6 +847,41 @@ function showEnd(data,players) {
     </div>`;
   }).join('');
 }
+
+// ── Rejouer ──────────────────────────────────────────────────────────
+window.replayGame = async () => {
+  if (!state.isOrganizer) return toast("Seul l'organisateur peut relancer.");
+  const snap = await getDoc(gameRef());
+  const data = snap.data();
+  const players = {};
+  // Remettre tous les joueurs à zéro, garder les mêmes
+  Object.values(data.players).forEach((p, i) => {
+    players[p.uid] = {
+      ...p,
+      role: null,
+      alive: true,
+      myTasks: [],
+      emergenciesLeft: data.config.meetings,
+      colorIdx: i,
+    };
+  });
+  await updateDoc(gameRef(), {
+    status: 'lobby',
+    players,
+    tasks: [],
+    zones: [],
+    mapImage: null,
+    progress: { completed: 0, total: 0 },
+    meeting: null,
+    endReason: null,
+    winner: null,
+    startedAt: null,
+  });
+  localTasks = []; localZones = [];
+  state.isOrganizer = data.players[state.uid]?.isOrganizer || false;
+  setupLobbyUI();
+  subscribeGame();
+};
 
 // ── Admin ────────────────────────────────────────────────────────────
 window.openAdminModal=()=>openModal('admin-modal');

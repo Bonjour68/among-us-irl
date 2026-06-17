@@ -5,461 +5,128 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Among Us IRL</title>
   <style>
-    /* ===== TOKENS ===== */
     :root {
-      --bg:        #0a0c14;
-      --bg2:       #111827;
-      --bg3:       #1e2535;
-      --border:    #2a3347;
-      --accent:    #6c63ff;
-      --accent2:   #ff4757;
-      --accent3:   #2ed573;
-      --warn:      #ffa502;
-      --text:      #e8eaf0;
-      --text2:     #8892a4;
-      --radius:    14px;
-      --radius-sm: 8px;
+      --bg:#0a0c14; --bg2:#111827; --bg3:#1e2535; --border:#2a3347;
+      --accent:#6c63ff; --accent2:#ff4757; --accent3:#2ed573; --warn:#ffa502;
+      --text:#e8eaf0; --text2:#8892a4; --radius:14px; --radius-sm:8px;
     }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-
-    body {
-      font-family: 'Segoe UI', system-ui, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
-
-    /* ===== SCREENS ===== */
-    .screen { display: none; min-height: 100vh; flex-direction: column; }
-    .screen.active { display: flex; }
-
-    /* ===== HEADER ===== */
-    .header {
-      padding: 16px 20px 12px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      border-bottom: 1px solid var(--border);
-      background: var(--bg2);
-      position: sticky;
-      top: 0;
-      z-index: 10;
-    }
-    .header h2 { font-size: 18px; font-weight: 700; flex: 1; }
-    .header .back-btn {
-      background: none;
-      border: none;
-      color: var(--text2);
-      font-size: 22px;
-      cursor: pointer;
-      padding: 4px;
-    }
-
-    /* ===== CONTENT ===== */
-    .content {
-      flex: 1;
-      padding: 20px;
-      overflow-y: auto;
-    }
-
-    /* ===== LOGO / ACCUEIL ===== */
-    .logo-area {
-      text-align: center;
-      padding: 48px 20px 32px;
-    }
-    .logo-icon {
-      font-size: 72px;
-      display: block;
-      margin-bottom: 16px;
-      filter: drop-shadow(0 0 24px rgba(108,99,255,0.6));
-    }
-    .logo-title {
-      font-size: 32px;
-      font-weight: 900;
-      letter-spacing: -1px;
-      background: linear-gradient(135deg, #6c63ff, #ff4757);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-    .logo-sub {
-      color: var(--text2);
-      font-size: 14px;
-      margin-top: 6px;
-    }
-
-    /* ===== BOUTONS ===== */
-    .btn {
-      display: block;
-      width: 100%;
-      padding: 16px 20px;
-      border: none;
-      border-radius: var(--radius);
-      font-size: 16px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: transform 0.1s, opacity 0.1s;
-      text-align: center;
-    }
-    .btn:active { transform: scale(0.97); opacity: 0.9; }
-    .btn-primary { background: var(--accent); color: #fff; }
-    .btn-secondary { background: var(--bg3); color: var(--text); border: 1px solid var(--border); }
-    .btn-danger { background: var(--accent2); color: #fff; }
-    .btn-success { background: var(--accent3); color: #0a0c14; }
-    .btn-warn { background: var(--warn); color: #0a0c14; }
-    .btn-sm {
-      padding: 10px 16px;
-      font-size: 14px;
-      border-radius: var(--radius-sm);
-      width: auto;
-      display: inline-block;
-    }
-    .btn + .btn { margin-top: 12px; }
-
-    /* ===== INPUTS ===== */
-    .input-group { margin-bottom: 16px; }
-    .input-group label { display: block; font-size: 13px; color: var(--text2); margin-bottom: 6px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
-    input, select, textarea {
-      width: 100%;
-      padding: 14px 16px;
-      background: var(--bg3);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      color: var(--text);
-      font-size: 16px;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-    input:focus, select:focus { border-color: var(--accent); }
-    select option { background: var(--bg2); }
-
-    /* ===== CARDS ===== */
-    .card {
-      background: var(--bg2);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 16px;
-      margin-bottom: 12px;
-    }
-    .card-title { font-size: 13px; color: var(--text2); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
-    .card-value { font-size: 22px; font-weight: 800; }
-
-    /* ===== BADGE ROLE ===== */
-    .role-card {
-      border-radius: var(--radius);
-      padding: 24px 20px;
-      text-align: center;
-      margin-bottom: 16px;
-      position: relative;
-      overflow: hidden;
-    }
-    .role-card::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      opacity: 0.12;
-      background: radial-gradient(circle at 50% 0%, #fff, transparent 70%);
-    }
-    .role-card.innocent { background: linear-gradient(135deg, #1a2a4a, #0d1b35); border: 2px solid #2ed573; }
-    .role-card.impostor { background: linear-gradient(135deg, #2a1a1a, #1a0d0d); border: 2px solid #ff4757; }
-    .role-card.detective { background: linear-gradient(135deg, #1a1a2a, #0d0d1a); border: 2px solid #6c63ff; }
-    .role-icon { font-size: 52px; display: block; margin-bottom: 10px; }
-    .role-name { font-size: 26px; font-weight: 900; letter-spacing: -0.5px; }
-    .role-desc { font-size: 13px; color: var(--text2); margin-top: 6px; line-height: 1.5; }
-
-    /* ===== JAUGE ===== */
-    .progress-wrap { margin-bottom: 16px; }
-    .progress-label { display: flex; justify-content: space-between; font-size: 13px; color: var(--text2); margin-bottom: 8px; }
-    .progress-bar { height: 10px; background: var(--bg3); border-radius: 99px; overflow: hidden; }
-    .progress-fill {
-      height: 100%;
-      background: linear-gradient(90deg, var(--accent3), #00d2d3);
-      border-radius: 99px;
-      transition: width 0.5s ease;
-      width: 0%;
-    }
-
-    /* ===== LISTE JOUEURS ===== */
-    .player-item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 12px 16px;
-      background: var(--bg3);
-      border-radius: var(--radius-sm);
-      margin-bottom: 8px;
-      border: 1px solid var(--border);
-    }
-    .player-avatar {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 18px;
-      font-weight: 800;
-      flex-shrink: 0;
-    }
-    .player-info { flex: 1; }
-    .player-name { font-weight: 700; font-size: 15px; }
-    .player-status { font-size: 12px; color: var(--text2); margin-top: 2px; }
-    .player-badge {
-      font-size: 11px;
-      padding: 3px 8px;
-      border-radius: 99px;
-      font-weight: 700;
-    }
-    .badge-alive { background: rgba(46,213,115,0.15); color: var(--accent3); }
-    .badge-dead { background: rgba(255,71,87,0.15); color: var(--accent2); }
-    .badge-org { background: rgba(108,99,255,0.15); color: var(--accent); }
-
-    /* ===== TÂCHES ===== */
-    .task-item {
-      display: flex;
-      align-items: flex-start;
-      gap: 14px;
-      padding: 14px 16px;
-      background: var(--bg3);
-      border-radius: var(--radius-sm);
-      margin-bottom: 8px;
-      border: 1px solid var(--border);
-      cursor: pointer;
-      transition: border-color 0.2s;
-    }
-    .task-item.done { opacity: 0.5; border-color: var(--accent3); }
-    .task-check {
-      width: 24px;
-      height: 24px;
-      border-radius: 6px;
-      border: 2px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      margin-top: 1px;
-      font-size: 14px;
-    }
-    .task-item.done .task-check { background: var(--accent3); border-color: var(--accent3); }
-    .task-info { flex: 1; }
-    .task-name { font-weight: 700; font-size: 15px; }
-    .task-zone { font-size: 12px; color: var(--text2); margin-top: 3px; }
-    .task-diff { display: inline-block; margin-top: 5px; font-size: 11px; padding: 2px 8px; border-radius: 99px; }
-    .diff-easy { background: rgba(46,213,115,0.15); color: var(--accent3); }
-    .diff-medium { background: rgba(255,165,2,0.15); color: var(--warn); }
-    .diff-hard { background: rgba(255,71,87,0.15); color: var(--accent2); }
-
-    /* ===== VOTE ===== */
-    .vote-item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 14px 16px;
-      background: var(--bg3);
-      border-radius: var(--radius-sm);
-      margin-bottom: 8px;
-      border: 2px solid var(--border);
-      cursor: pointer;
-      transition: border-color 0.2s, background 0.2s;
-    }
-    .vote-item.selected { border-color: var(--accent2); background: rgba(255,71,87,0.08); }
-    .vote-item.skip-vote { border-color: var(--border); }
-    .vote-item.skip-vote.selected { border-color: var(--warn); background: rgba(255,165,2,0.08); }
-
-    /* ===== ZONE CARTE ===== */
-    .map-zone {
-      padding: 12px 16px;
-      background: var(--bg3);
-      border-radius: var(--radius-sm);
-      margin-bottom: 8px;
-      border: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .map-zone-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
-    .map-zone-forbidden .map-zone-dot { background: var(--accent2); }
-    .map-zone-special .map-zone-dot { background: var(--warn); }
-
-    /* ===== RÉSULTAT VOTE ===== */
-    .result-bar {
-      height: 8px;
-      background: var(--accent2);
-      border-radius: 99px;
-      margin-top: 6px;
-      transition: width 0.5s;
-    }
-
-    /* ===== TOAST ===== */
-    #toast {
-      position: fixed;
-      bottom: 32px;
-      left: 50%;
-      transform: translateX(-50%) translateY(80px);
-      background: var(--bg3);
-      border: 1px solid var(--border);
-      color: var(--text);
-      padding: 12px 20px;
-      border-radius: var(--radius);
-      font-size: 14px;
-      font-weight: 600;
-      z-index: 999;
-      transition: transform 0.3s ease;
-      white-space: nowrap;
-      max-width: 90vw;
-      text-align: center;
-    }
-    #toast.show { transform: translateX(-50%) translateY(0); }
-
-    /* ===== DIVIDER ===== */
-    .divider { height: 1px; background: var(--border); margin: 16px 0; }
-    .section-title { font-size: 13px; color: var(--text2); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
-
-    /* ===== STAT GRID ===== */
-    .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
-
-    /* ===== END CARD ===== */
-    .end-banner {
-      text-align: center;
-      padding: 40px 20px;
-    }
-    .end-emoji { font-size: 80px; display: block; margin-bottom: 16px; }
-    .end-title { font-size: 28px; font-weight: 900; margin-bottom: 8px; }
-    .end-sub { color: var(--text2); font-size: 15px; }
-
-    /* ===== MORT ===== */
-    .dead-overlay {
-      background: linear-gradient(135deg, #1a0d0d, #0a0608);
-      border: 2px solid var(--accent2);
-    }
-
-    /* ===== LOADING ===== */
-    .loading {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 16px;
-      padding: 60px 20px;
-      color: var(--text2);
-    }
-    .spinner {
-      width: 40px;
-      height: 40px;
-      border: 3px solid var(--border);
-      border-top-color: var(--accent);
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    /* ===== CODE PARTIE ===== */
-    .game-code {
-      font-size: 42px;
-      font-weight: 900;
-      letter-spacing: 8px;
-      text-align: center;
-      color: var(--accent);
-      padding: 20px;
-      background: var(--bg3);
-      border-radius: var(--radius);
-      border: 1px solid var(--border);
-      margin: 16px 0;
-      font-family: monospace;
-    }
-
-    /* ===== ADMIN FLOATING ===== */
-    #admin-btn {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      background: var(--bg3);
-      border: 1px solid var(--border);
-      font-size: 20px;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      z-index: 100;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.4);
-    }
-    #admin-btn.visible { display: flex; }
-
-    /* ===== MODAL ===== */
-    .modal-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.7);
-      z-index: 200;
-      align-items: flex-end;
-    }
-    .modal-overlay.open { display: flex; }
-    .modal {
-      background: var(--bg2);
-      border: 1px solid var(--border);
-      border-radius: var(--radius) var(--radius) 0 0;
-      padding: 20px;
-      width: 100%;
-      max-height: 80vh;
-      overflow-y: auto;
-    }
-    .modal-title { font-size: 18px; font-weight: 800; margin-bottom: 16px; }
-
-    /* ===== RÉUNION ALERT ===== */
-    .meeting-alert {
-      background: linear-gradient(135deg, #1a1a2a, #0d0d1a);
-      border: 2px solid var(--accent);
-      border-radius: var(--radius);
-      padding: 24px;
-      text-align: center;
-      margin-bottom: 20px;
-    }
-    .meeting-alert-icon { font-size: 48px; display: block; margin-bottom: 12px; }
-    .meeting-alert-title { font-size: 22px; font-weight: 900; color: var(--accent); }
-    .meeting-alert-sub { font-size: 13px; color: var(--text2); margin-top: 6px; }
-
-    /* Colors joueurs */
-    .color-0  { background: #e74c3c22; color: #e74c3c; }
-    .color-1  { background: #3498db22; color: #3498db; }
-    .color-2  { background: #2ecc7122; color: #2ecc71; }
-    .color-3  { background: #f39c1222; color: #f39c12; }
-    .color-4  { background: #9b59b622; color: #9b59b6; }
-    .color-5  { background: #1abc9c22; color: #1abc9c; }
-    .color-6  { background: #e67e2222; color: #e67e22; }
-    .color-7  { background: #e91e6322; color: #e91e63; }
-    .color-8  { background: #00bcd422; color: #00bcd4; }
-    .color-9  { background: #8bc34a22; color: #8bc34a; }
-    .color-10 { background: #ff572222; color: #ff5722; }
-    .color-11 { background: #607d8b22; color: #607d8b; }
+    * { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+    body { font-family:'Segoe UI',system-ui,sans-serif; background:var(--bg); color:var(--text); min-height:100vh; overflow-x:hidden; }
+    .screen { display:none; min-height:100vh; flex-direction:column; }
+    .screen.active { display:flex; }
+    .header { padding:16px 20px 12px; display:flex; align-items:center; gap:12px; border-bottom:1px solid var(--border); background:var(--bg2); position:sticky; top:0; z-index:10; }
+    .header h2 { font-size:18px; font-weight:700; flex:1; }
+    .back-btn { background:none; border:none; color:var(--text2); font-size:22px; cursor:pointer; padding:4px; }
+    .content { flex:1; padding:20px; overflow-y:auto; }
+    .logo-area { text-align:center; padding:48px 20px 32px; }
+    .logo-icon { font-size:72px; display:block; margin-bottom:16px; filter:drop-shadow(0 0 24px rgba(108,99,255,0.6)); }
+    .logo-title { font-size:32px; font-weight:900; letter-spacing:-1px; background:linear-gradient(135deg,#6c63ff,#ff4757); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+    .logo-sub { color:var(--text2); font-size:14px; margin-top:6px; }
+    .btn { display:block; width:100%; padding:16px 20px; border:none; border-radius:var(--radius); font-size:16px; font-weight:700; cursor:pointer; transition:transform 0.1s,opacity 0.1s; text-align:center; }
+    .btn:active { transform:scale(0.97); opacity:0.9; }
+    .btn-primary { background:var(--accent); color:#fff; }
+    .btn-secondary { background:var(--bg3); color:var(--text); border:1px solid var(--border); }
+    .btn-danger { background:var(--accent2); color:#fff; }
+    .btn-success { background:var(--accent3); color:#0a0c14; }
+    .btn-warn { background:var(--warn); color:#0a0c14; }
+    .btn-sm { padding:10px 16px; font-size:14px; border-radius:var(--radius-sm); width:auto; display:inline-block; }
+    .btn+.btn { margin-top:12px; }
+    .input-group { margin-bottom:16px; }
+    .input-group label { display:block; font-size:13px; color:var(--text2); margin-bottom:6px; font-weight:600; text-transform:uppercase; letter-spacing:0.5px; }
+    input,select,textarea { width:100%; padding:14px 16px; background:var(--bg3); border:1px solid var(--border); border-radius:var(--radius-sm); color:var(--text); font-size:16px; outline:none; transition:border-color 0.2s; }
+    input:focus,select:focus { border-color:var(--accent); }
+    select option { background:var(--bg2); }
+    .card { background:var(--bg2); border:1px solid var(--border); border-radius:var(--radius); padding:16px; margin-bottom:12px; }
+    .role-card { border-radius:var(--radius); padding:24px 20px; text-align:center; margin-bottom:16px; position:relative; overflow:hidden; }
+    .role-card::before { content:''; position:absolute; inset:0; opacity:0.12; background:radial-gradient(circle at 50% 0%,#fff,transparent 70%); }
+    .role-card.innocent { background:linear-gradient(135deg,#1a2a4a,#0d1b35); border:2px solid #2ed573; }
+    .role-card.impostor { background:linear-gradient(135deg,#2a1a1a,#1a0d0d); border:2px solid #ff4757; }
+    .role-card.detective { background:linear-gradient(135deg,#1a1a2a,#0d0d1a); border:2px solid #6c63ff; }
+    .role-icon { font-size:52px; display:block; margin-bottom:10px; }
+    .role-name { font-size:26px; font-weight:900; letter-spacing:-0.5px; }
+    .role-desc { font-size:13px; color:var(--text2); margin-top:6px; line-height:1.5; }
+    .progress-wrap { margin-bottom:16px; }
+    .progress-label { display:flex; justify-content:space-between; font-size:13px; color:var(--text2); margin-bottom:8px; }
+    .progress-bar { height:10px; background:var(--bg3); border-radius:99px; overflow:hidden; }
+    .progress-fill { height:100%; background:linear-gradient(90deg,var(--accent3),#00d2d3); border-radius:99px; transition:width 0.5s ease; width:0%; }
+    .player-item { display:flex; align-items:center; gap:12px; padding:12px 16px; background:var(--bg3); border-radius:var(--radius-sm); margin-bottom:8px; border:1px solid var(--border); }
+    .player-avatar { width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:18px; font-weight:800; flex-shrink:0; }
+    .player-info { flex:1; }
+    .player-name { font-weight:700; font-size:15px; }
+    .player-status { font-size:12px; color:var(--text2); margin-top:2px; }
+    .player-badge { font-size:11px; padding:3px 8px; border-radius:99px; font-weight:700; }
+    .badge-alive { background:rgba(46,213,115,0.15); color:var(--accent3); }
+    .badge-dead { background:rgba(255,71,87,0.15); color:var(--accent2); }
+    .badge-org { background:rgba(108,99,255,0.15); color:var(--accent); }
+    .task-item { display:flex; align-items:flex-start; gap:14px; padding:14px 16px; background:var(--bg3); border-radius:var(--radius-sm); margin-bottom:8px; border:1px solid var(--border); cursor:pointer; transition:border-color 0.2s; }
+    .task-item.done { opacity:0.5; border-color:var(--accent3); }
+    .task-check { width:24px; height:24px; border-radius:6px; border:2px solid var(--border); display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:1px; font-size:14px; }
+    .task-item.done .task-check { background:var(--accent3); border-color:var(--accent3); }
+    .task-info { flex:1; }
+    .task-name { font-weight:700; font-size:15px; }
+    .task-zone { font-size:12px; color:var(--text2); margin-top:3px; }
+    .task-diff { display:inline-block; margin-top:5px; font-size:11px; padding:2px 8px; border-radius:99px; }
+    .diff-easy { background:rgba(46,213,115,0.15); color:var(--accent3); }
+    .diff-medium { background:rgba(255,165,2,0.15); color:var(--warn); }
+    .diff-hard { background:rgba(255,71,87,0.15); color:var(--accent2); }
+    .vote-item { display:flex; align-items:center; gap:12px; padding:14px 16px; background:var(--bg3); border-radius:var(--radius-sm); margin-bottom:8px; border:2px solid var(--border); cursor:pointer; transition:border-color 0.2s,background 0.2s; }
+    .vote-item.selected { border-color:var(--accent2); background:rgba(255,71,87,0.08); }
+    .vote-item.skip-vote.selected { border-color:var(--warn); background:rgba(255,165,2,0.08); }
+    /* Carte image */
+    .map-container { position:relative; width:100%; border-radius:var(--radius); overflow:hidden; border:1px solid var(--border); margin-bottom:12px; background:var(--bg3); min-height:120px; display:flex; align-items:center; justify-content:center; }
+    .map-container img { width:100%; height:auto; display:block; }
+    .map-placeholder { color:var(--text2); font-size:14px; padding:40px 20px; text-align:center; }
+    .map-upload-btn { display:block; width:100%; padding:14px; background:var(--bg3); border:2px dashed var(--border); border-radius:var(--radius); color:var(--text2); font-size:15px; font-weight:600; text-align:center; cursor:pointer; margin-bottom:12px; }
+    .map-upload-btn:hover { border-color:var(--accent); color:var(--accent); }
+    #map-file-input { display:none; }
+    .map-zone { padding:12px 16px; background:var(--bg3); border-radius:var(--radius-sm); margin-bottom:8px; border:1px solid var(--border); display:flex; align-items:center; gap:10px; }
+    .map-zone-dot { width:10px; height:10px; border-radius:50%; background:var(--accent); flex-shrink:0; }
+    .map-zone-forbidden .map-zone-dot { background:var(--accent2); }
+    .map-zone-special .map-zone-dot { background:var(--warn); }
+    .result-bar { height:8px; background:var(--accent2); border-radius:99px; margin-top:6px; transition:width 0.5s; }
+    #toast { position:fixed; bottom:32px; left:50%; transform:translateX(-50%) translateY(80px); background:var(--bg3); border:1px solid var(--border); color:var(--text); padding:12px 20px; border-radius:var(--radius); font-size:14px; font-weight:600; z-index:999; transition:transform 0.3s ease; white-space:nowrap; max-width:90vw; text-align:center; }
+    #toast.show { transform:translateX(-50%) translateY(0); }
+    .divider { height:1px; background:var(--border); margin:16px 0; }
+    .section-title { font-size:13px; color:var(--text2); font-weight:700; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:12px; }
+    .end-banner { text-align:center; padding:40px 20px; }
+    .end-emoji { font-size:80px; display:block; margin-bottom:16px; }
+    .end-title { font-size:28px; font-weight:900; margin-bottom:8px; }
+    .end-sub { color:var(--text2); font-size:15px; }
+    .dead-overlay { background:linear-gradient(135deg,#1a0d0d,#0a0608); border:2px solid var(--accent2); }
+    .loading { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px; padding:60px 20px; color:var(--text2); }
+    .spinner { width:40px; height:40px; border:3px solid var(--border); border-top-color:var(--accent); border-radius:50%; animation:spin 0.8s linear infinite; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    .game-code { font-size:42px; font-weight:900; letter-spacing:8px; text-align:center; color:var(--accent); padding:20px; background:var(--bg3); border-radius:var(--radius); border:1px solid var(--border); margin:16px 0; font-family:monospace; }
+    #admin-btn { position:fixed; bottom:20px; right:20px; width:48px; height:48px; border-radius:50%; background:var(--bg3); border:1px solid var(--border); font-size:20px; display:none; align-items:center; justify-content:center; cursor:pointer; z-index:100; box-shadow:0 4px 16px rgba(0,0,0,0.4); }
+    #admin-btn.visible { display:flex; }
+    .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:200; align-items:flex-end; }
+    .modal-overlay.open { display:flex; }
+    .modal { background:var(--bg2); border:1px solid var(--border); border-radius:var(--radius) var(--radius) 0 0; padding:20px; width:100%; max-height:80vh; overflow-y:auto; }
+    .modal-title { font-size:18px; font-weight:800; margin-bottom:16px; }
+    .meeting-alert { background:linear-gradient(135deg,#1a1a2a,#0d0d1a); border:2px solid var(--accent); border-radius:var(--radius); padding:24px; text-align:center; margin-bottom:20px; }
+    .meeting-alert-icon { font-size:48px; display:block; margin-bottom:12px; }
+    .meeting-alert-title { font-size:22px; font-weight:900; color:var(--accent); }
+    .meeting-alert-sub { font-size:13px; color:var(--text2); margin-top:6px; }
+    .color-0{background:#e74c3c22;color:#e74c3c} .color-1{background:#3498db22;color:#3498db} .color-2{background:#2ecc7122;color:#2ecc71}
+    .color-3{background:#f39c1222;color:#f39c12} .color-4{background:#9b59b622;color:#9b59b6} .color-5{background:#1abc9c22;color:#1abc9c}
+    .color-6{background:#e67e2222;color:#e67e22} .color-7{background:#e91e6322;color:#e91e63} .color-8{background:#00bcd422;color:#00bcd4}
+    .color-9{background:#8bc34a22;color:#8bc34a} .color-10{background:#ff572222;color:#ff5722} .color-11{background:#607d8b22;color:#607d8b}
   </style>
 </head>
 <body>
-
-<!-- ========== TOAST ========== -->
 <div id="toast"></div>
-
-<!-- ========== BOUTON ADMIN FLOTTANT ========== -->
 <button id="admin-btn" onclick="openAdminModal()">⚙️</button>
 
-<!-- ========== MODAL ADMIN ========== -->
 <div class="modal-overlay" id="admin-modal">
   <div class="modal">
     <div class="modal-title">⚙️ Panneau Admin</div>
     <button class="btn btn-warn" onclick="adminForceMeeting()">🚨 Forcer une réunion</button>
     <button class="btn btn-secondary" style="margin-top:10px" onclick="adminEndGame()">🏁 Terminer la partie</button>
-    <button class="btn btn-secondary" style="margin-top:10px" onclick="closeAdminModal()">Fermer</button>
+    <button class="btn btn-secondary" style="margin-top:10px" onclick="closeModal('admin-modal')">Fermer</button>
   </div>
 </div>
 
-<!-- ================================================================
-     ÉCRAN 1 : ACCUEIL
-================================================================ -->
+<!-- ACCUEIL -->
 <div class="screen active" id="screen-home">
   <div class="logo-area">
     <span class="logo-icon">🚀</span>
@@ -472,342 +139,210 @@
   </div>
 </div>
 
-<!-- ================================================================
-     ÉCRAN 2 : CRÉER UNE PARTIE
-================================================================ -->
+<!-- CRÉER -->
 <div class="screen" id="screen-create">
-  <div class="header">
-    <button class="back-btn" onclick="showScreen('screen-home')">←</button>
-    <h2>Créer une partie</h2>
-  </div>
+  <div class="header"><button class="back-btn" onclick="showScreen('screen-home')">←</button><h2>Créer une partie</h2></div>
   <div class="content">
-    <div class="input-group">
-      <label>Ton prénom / pseudo</label>
-      <input type="text" id="create-name" placeholder="Ex: Lolita" maxlength="20" />
+    <div class="input-group"><label>Ton prénom / pseudo</label><input type="text" id="create-name" placeholder="Ex: Lolita" maxlength="20"/></div>
+    <div class="input-group"><label>Nombre d'imposteurs</label>
+      <select id="create-impostors"><option value="1">1 imposteur</option><option value="2" selected>2 imposteurs</option><option value="3">3 imposteurs</option></select>
     </div>
-    <div class="input-group">
-      <label>Nombre d'imposteurs</label>
-      <select id="create-impostors">
-        <option value="1">1 imposteur</option>
-        <option value="2" selected>2 imposteurs</option>
-        <option value="3">3 imposteurs</option>
-      </select>
+    <div class="input-group"><label>Durée (minutes)</label>
+      <select id="create-duration"><option value="30">30 min</option><option value="45" selected>45 min</option><option value="60">60 min</option><option value="90">90 min</option><option value="0">Sans limite</option></select>
     </div>
-    <div class="input-group">
-      <label>Durée de la partie (minutes)</label>
-      <select id="create-duration">
-        <option value="30">30 minutes</option>
-        <option value="45" selected>45 minutes</option>
-        <option value="60">60 minutes</option>
-        <option value="90">90 minutes</option>
-        <option value="0">Sans limite</option>
-      </select>
+    <div class="input-group"><label>Réunions d'urgence par joueur</label>
+      <select id="create-meetings"><option value="1">1</option><option value="2" selected>2</option><option value="3">3</option></select>
     </div>
-    <div class="input-group">
-      <label>Réunions d'urgence par joueur</label>
-      <select id="create-meetings">
-        <option value="1">1 réunion</option>
-        <option value="2" selected>2 réunions</option>
-        <option value="3">3 réunions</option>
-      </select>
-    </div>
-    <div class="divider"></div>
-    <div class="section-title">Rôles disponibles</div>
-    <div class="card" style="margin-bottom:8px">
+    <div class="card">
       <label style="display:flex;align-items:center;gap:10px;cursor:pointer">
-        <input type="checkbox" id="role-detective" checked style="width:20px;height:20px;flex-shrink:0"> 
-        <span><strong>🔍 Détective</strong><br><small style="color:var(--text2)">Voit si un joueur est "suspect" (flag aléatoire)</small></span>
+        <input type="checkbox" id="role-detective" checked style="width:20px;height:20px;flex-shrink:0">
+        <span><strong>🔍 Détective</strong><br><small style="color:var(--text2)">Voit le nombre d'imposteurs</small></span>
       </label>
     </div>
-    <div class="divider"></div>
     <button class="btn btn-primary" onclick="createGame()">🎮 Créer la partie</button>
   </div>
 </div>
 
-<!-- ================================================================
-     ÉCRAN 3 : REJOINDRE
-================================================================ -->
+<!-- REJOINDRE -->
 <div class="screen" id="screen-join">
-  <div class="header">
-    <button class="back-btn" onclick="showScreen('screen-home')">←</button>
-    <h2>Rejoindre une partie</h2>
-  </div>
+  <div class="header"><button class="back-btn" onclick="showScreen('screen-home')">←</button><h2>Rejoindre</h2></div>
   <div class="content">
-    <div class="input-group">
-      <label>Code de la partie</label>
-      <input type="text" id="join-code" placeholder="Ex: ABC123" maxlength="6" style="text-transform:uppercase;font-size:24px;letter-spacing:4px;text-align:center" />
-    </div>
-    <div class="input-group">
-      <label>Ton prénom / pseudo</label>
-      <input type="text" id="join-name" placeholder="Ex: Thomas" maxlength="20" />
-    </div>
+    <div class="input-group"><label>Code de la partie</label><input type="text" id="join-code" placeholder="ABC123" maxlength="6" style="text-transform:uppercase;font-size:24px;letter-spacing:4px;text-align:center"/></div>
+    <div class="input-group"><label>Ton prénom / pseudo</label><input type="text" id="join-name" placeholder="Ex: Thomas" maxlength="20"/></div>
     <button class="btn btn-primary" onclick="joinGame()">🚀 Rejoindre</button>
   </div>
 </div>
 
-<!-- ================================================================
-     ÉCRAN 4 : LOBBY (ORGANISATEUR)
-================================================================ -->
+<!-- LOBBY -->
 <div class="screen" id="screen-lobby">
-  <div class="header">
-    <h2>🛸 Salon d'attente</h2>
-    <span id="lobby-org-badge" class="player-badge badge-org" style="display:none">ORGA</span>
-  </div>
+  <div class="header"><h2>🛸 Salon d'attente</h2><span id="lobby-org-badge" class="player-badge badge-org" style="display:none">ORGA</span></div>
   <div class="content">
     <div class="section-title">Code de la partie</div>
     <div class="game-code" id="lobby-code">------</div>
     <p style="text-align:center;color:var(--text2);font-size:13px;margin-bottom:20px">Partage ce code avec tes amis</p>
-
-    <div class="section-title">Joueurs connectés (<span id="lobby-count">0</span>)</div>
+    <div class="section-title">Joueurs (<span id="lobby-count">0</span>)</div>
     <div id="lobby-players-list"></div>
-
     <div class="divider"></div>
     <div id="lobby-org-controls" style="display:none">
-      <div class="section-title">Configuration des tâches</div>
-      <div id="tasks-config-list"></div>
-      <button class="btn btn-secondary" onclick="openAddTask()" style="margin-bottom:16px">➕ Ajouter une tâche</button>
-
-      <div class="section-title">Zones de la carte</div>
+      <div class="section-title">🗺️ Carte du jeu</div>
+      <div class="map-container" id="lobby-map-container"><div class="map-placeholder">Aucune carte chargée</div></div>
+      <label class="map-upload-btn" for="map-file-input">📸 Importer une photo de carte</label>
+      <input type="file" id="map-file-input" accept="image/*" onchange="handleMapUpload(event)"/>
+      <div class="section-title">Zones</div>
       <div id="zones-config-list"></div>
-      <button class="btn btn-secondary" onclick="openAddZone()" style="margin-bottom:16px">🗺️ Ajouter une zone</button>
-
+      <button class="btn btn-secondary" onclick="openModal('modal-add-zone')" style="margin-bottom:16px">➕ Ajouter une zone</button>
       <div class="divider"></div>
-      <button class="btn btn-success" onclick="startGame()" id="btn-start">▶️ Lancer la partie</button>
+      <div class="section-title">Tâches</div>
+      <div id="tasks-config-list"></div>
+      <button class="btn btn-secondary" onclick="openModal('modal-add-task')" style="margin-bottom:16px">➕ Ajouter une tâche</button>
+      <div class="divider"></div>
+      <button class="btn btn-success" onclick="startGame()">▶️ Lancer la partie</button>
     </div>
     <div id="lobby-player-wait" style="display:none">
-      <div class="loading">
-        <div class="spinner"></div>
-        <span>En attente du lancement par l'organisateur…</span>
-      </div>
+      <div class="loading"><div class="spinner"></div><span>En attente du lancement…</span></div>
     </div>
   </div>
 </div>
 
-<!-- ================================================================
-     MODAL AJOUT TÂCHE
-================================================================ -->
+<!-- MODAL TÂCHE -->
 <div class="modal-overlay" id="modal-add-task">
   <div class="modal">
     <div class="modal-title">➕ Nouvelle tâche</div>
-    <div class="input-group">
-      <label>Nom de la tâche</label>
-      <input type="text" id="task-name-input" placeholder="Ex: Trouver le code secret" />
-    </div>
-    <div class="input-group">
-      <label>Description</label>
-      <input type="text" id="task-desc-input" placeholder="Ex: Le code est affiché sur le frigo" />
-    </div>
-    <div class="input-group">
-      <label>Zone / Lieu</label>
-      <input type="text" id="task-zone-input" placeholder="Ex: Cuisine" />
-    </div>
-    <div class="input-group">
-      <label>Difficulté</label>
-      <select id="task-diff-input">
-        <option value="easy">Facile</option>
-        <option value="medium" selected>Moyen</option>
-        <option value="hard">Difficile</option>
-      </select>
+    <div class="input-group"><label>Nom</label><input type="text" id="task-name-input" placeholder="Ex: Trouver le code secret"/></div>
+    <div class="input-group"><label>Description</label><input type="text" id="task-desc-input" placeholder="Ex: Affiché sur le frigo"/></div>
+    <div class="input-group"><label>Zone / Lieu</label><input type="text" id="task-zone-input" placeholder="Ex: Cuisine"/></div>
+    <div class="input-group"><label>Difficulté</label>
+      <select id="task-diff-input"><option value="easy">Facile</option><option value="medium" selected>Moyen</option><option value="hard">Difficile</option></select>
     </div>
     <button class="btn btn-primary" onclick="addTask()">Ajouter</button>
     <button class="btn btn-secondary" style="margin-top:8px" onclick="closeModal('modal-add-task')">Annuler</button>
   </div>
 </div>
 
-<!-- ================================================================
-     MODAL AJOUT ZONE
-================================================================ -->
+<!-- MODAL ZONE -->
 <div class="modal-overlay" id="modal-add-zone">
   <div class="modal">
     <div class="modal-title">🗺️ Nouvelle zone</div>
-    <div class="input-group">
-      <label>Nom de la zone</label>
-      <input type="text" id="zone-name-input" placeholder="Ex: Salon, Jardin, Cave…" />
-    </div>
-    <div class="input-group">
-      <label>Type</label>
-      <select id="zone-type-input">
-        <option value="normal">Zone normale</option>
-        <option value="forbidden">Zone interdite</option>
-        <option value="special">Zone spéciale</option>
-      </select>
+    <div class="input-group"><label>Nom</label><input type="text" id="zone-name-input" placeholder="Ex: Salon, Jardin…"/></div>
+    <div class="input-group"><label>Type</label>
+      <select id="zone-type-input"><option value="normal">Normale</option><option value="forbidden">Interdite</option><option value="special">Spéciale</option></select>
     </div>
     <button class="btn btn-primary" onclick="addZone()">Ajouter</button>
     <button class="btn btn-secondary" style="margin-top:8px" onclick="closeModal('modal-add-zone')">Annuler</button>
   </div>
 </div>
 
-<!-- ================================================================
-     ÉCRAN 5 : JEU JOUEUR ACTIF
-================================================================ -->
+<!-- JEU -->
 <div class="screen" id="screen-game">
-  <div class="header">
-    <h2 id="game-player-name">Joueur</h2>
-    <span id="game-status-badge" class="player-badge badge-alive">EN VIE</span>
-  </div>
+  <div class="header"><h2 id="game-player-name">Joueur</h2><span id="game-status-badge" class="player-badge badge-alive">EN VIE</span></div>
   <div class="content">
-
-    <!-- Carte de rôle -->
     <div id="role-card-display" class="role-card innocent">
       <span class="role-icon" id="role-icon">👤</span>
       <div class="role-name" id="role-name">Chargement…</div>
       <div class="role-desc" id="role-desc"></div>
     </div>
-
-    <!-- Jauge collective -->
     <div class="section-title">Progression collective</div>
     <div class="progress-wrap">
-      <div class="progress-label">
-        <span id="progress-text">0 tâches terminées</span>
-        <span id="progress-pct">0%</span>
-      </div>
+      <div class="progress-label"><span id="progress-text">0 tâches</span><span id="progress-pct">0%</span></div>
       <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
     </div>
-
-    <!-- Timer -->
     <div id="timer-card" class="card" style="display:none;text-align:center;margin-bottom:16px">
-      <div class="card-title">Temps restant</div>
-      <div class="card-value" id="timer-display" style="font-family:monospace;color:var(--warn)">--:--</div>
+      <div class="section-title">Temps restant</div>
+      <div id="timer-display" style="font-size:32px;font-weight:900;font-family:monospace;color:var(--warn)">--:--</div>
     </div>
-
-    <!-- Mes tâches -->
+    <div class="section-title">🗺️ Carte du jeu</div>
+    <div class="map-container" id="game-map-container"><div class="map-placeholder">Aucune carte</div></div>
+    <div id="game-zones-list"></div>
+    <div class="divider"></div>
     <div class="section-title">Mes tâches</div>
     <div id="player-tasks-list"></div>
-
-    <!-- Carte des zones -->
-    <div class="divider"></div>
-    <div class="section-title">🗺️ Carte du jeu</div>
-    <div id="game-zones-list"></div>
-
-    <!-- Joueurs -->
     <div class="divider"></div>
     <div class="section-title">Joueurs</div>
     <div id="game-players-list"></div>
-
-    <!-- Actions -->
     <div class="divider"></div>
     <button class="btn btn-warn" onclick="reportBody()">🔴 Signaler un corps</button>
-    <button class="btn btn-secondary" onclick="callEmergencyMeeting()" style="margin-top:10px">🚨 Réunion d'urgence (<span id="emergency-left">2</span> restante(s))</button>
-    <button class="btn btn-danger" onclick="declareDead()" style="margin-top:10px">💀 Je suis mort / hors-jeu</button>
+    <button class="btn btn-secondary" style="margin-top:10px" onclick="callEmergencyMeeting()">🚨 Réunion d'urgence (<span id="emergency-left">2</span>)</button>
+    <button class="btn btn-danger" style="margin-top:10px" onclick="declareDead()">💀 Je suis mort / hors-jeu</button>
   </div>
 </div>
 
-<!-- ================================================================
-     ÉCRAN 6 : JOUEUR MORT
-================================================================ -->
+<!-- MORT -->
 <div class="screen" id="screen-dead">
-  <div class="header">
-    <h2>Mode Spectateur</h2>
-    <span class="player-badge badge-dead">MORT</span>
-  </div>
+  <div class="header"><h2>Spectateur</h2><span class="player-badge badge-dead">MORT</span></div>
   <div class="content">
     <div class="card dead-overlay" style="text-align:center;padding:32px">
       <span style="font-size:56px;display:block;margin-bottom:12px">👻</span>
       <div style="font-size:20px;font-weight:800;margin-bottom:8px">Tu es hors-jeu</div>
       <div style="color:var(--text2);font-size:14px">Tu peux suivre la partie mais ne peux plus agir</div>
     </div>
-
-    <!-- Jauge visible en spectateur -->
-    <div class="section-title">Progression collective</div>
+    <div class="section-title">Progression</div>
     <div class="progress-wrap">
-      <div class="progress-label">
-        <span id="dead-progress-text">0 tâches terminées</span>
-        <span id="dead-progress-pct">0%</span>
-      </div>
+      <div class="progress-label"><span id="dead-progress-text">0</span><span id="dead-progress-pct">0%</span></div>
       <div class="progress-bar"><div class="progress-fill" id="dead-progress-fill"></div></div>
     </div>
-
-    <div class="section-title">Joueurs en vie</div>
+    <div class="section-title">Joueurs</div>
     <div id="dead-players-list"></div>
   </div>
 </div>
 
-<!-- ================================================================
-     ÉCRAN 7 : RÉUNION / VOTE
-================================================================ -->
+<!-- RÉUNION -->
 <div class="screen" id="screen-meeting">
-  <div class="header">
-    <h2>🗳️ Réunion</h2>
-  </div>
+  <div class="header"><h2>🗳️ Réunion</h2></div>
   <div class="content">
     <div class="meeting-alert">
       <span class="meeting-alert-icon" id="meeting-icon">🔴</span>
       <div class="meeting-alert-title" id="meeting-title">Corps signalé !</div>
-      <div class="meeting-alert-sub" id="meeting-sub">Discutez entre vous, puis votez</div>
+      <div class="meeting-alert-sub">Discutez, puis votez</div>
     </div>
-
     <div id="meeting-alive-only" style="display:none">
-      <div class="section-title">Vote — Qui est l'imposteur ?</div>
+      <div class="section-title">Qui est l'imposteur ?</div>
       <div id="vote-players-list"></div>
-      <div class="vote-item skip-vote" id="vote-skip" onclick="castVote('skip')">
+      <div class="vote-item skip-vote" id="vote-skip" onclick="selectVote('skip')">
         <span style="font-size:24px">🚫</span>
-        <div class="player-info">
-          <div class="player-name">Passer mon vote</div>
-          <div class="player-status">Ne pas voter cette fois</div>
-        </div>
+        <div class="player-info"><div class="player-name">Passer mon vote</div></div>
       </div>
-      <button class="btn btn-danger" onclick="confirmVote()" style="margin-top:16px" id="btn-confirm-vote" disabled>Confirmer mon vote</button>
+      <button class="btn btn-danger" onclick="confirmVote()" style="margin-top:16px" id="btn-confirm-vote" disabled>Confirmer</button>
     </div>
-
     <div id="meeting-dead-msg" style="display:none;text-align:center;padding:20px">
-      <span style="font-size:40px">👻</span>
-      <p style="color:var(--text2);margin-top:10px">Tu es mort, tu ne peux pas voter</p>
+      <span style="font-size:40px">👻</span><p style="color:var(--text2);margin-top:10px">Tu es mort, tu ne votes pas</p>
     </div>
-
-    <!-- Résultats en attente -->
     <div id="vote-waiting" style="display:none">
-      <div class="loading">
-        <div class="spinner"></div>
-        <span>En attente des votes…</span>
-      </div>
+      <div class="loading"><div class="spinner"></div><span>En attente des votes…</span></div>
     </div>
   </div>
 </div>
 
-<!-- ================================================================
-     ÉCRAN 8 : RÉSULTATS DU VOTE
-================================================================ -->
+<!-- RÉSULTATS -->
 <div class="screen" id="screen-results">
-  <div class="header">
-    <h2>📊 Résultats</h2>
-  </div>
+  <div class="header"><h2>📊 Résultats</h2></div>
   <div class="content">
     <div id="results-content"></div>
-    <button class="btn btn-primary" onclick="resumeGame()" style="margin-top:16px">▶️ Reprendre la partie</button>
+    <button class="btn btn-primary" onclick="resumeGame()" style="margin-top:16px">▶️ Reprendre</button>
   </div>
 </div>
 
-<!-- ================================================================
-     ÉCRAN 9 : FIN DE PARTIE
-================================================================ -->
+<!-- FIN -->
 <div class="screen" id="screen-end">
   <div class="content" style="justify-content:center">
     <div class="end-banner">
       <span class="end-emoji" id="end-emoji">🏆</span>
       <div class="end-title" id="end-title">Les Innocents gagnent !</div>
-      <div class="end-sub" id="end-sub">Toutes les tâches ont été complétées</div>
+      <div class="end-sub" id="end-sub"></div>
     </div>
     <div class="divider"></div>
-    <div class="section-title">Les rôles révélés</div>
+    <div class="section-title">Rôles révélés</div>
     <div id="end-roles-list"></div>
-    <button class="btn btn-primary" onclick="showScreen('screen-home')" style="margin-top:24px">🏠 Retour à l'accueil</button>
+    <button class="btn btn-primary" onclick="showScreen('screen-home')" style="margin-top:24px">🏠 Accueil</button>
   </div>
 </div>
 
-<!-- ================================================================
-     FIREBASE + LOGIQUE JS
-================================================================ -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import {
-  getFirestore, doc, collection, setDoc, getDoc, updateDoc,
-  onSnapshot, arrayUnion, serverTimestamp
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-import {
-  getAuth, signInAnonymously
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, doc, setDoc, getDoc, updateDoc, onSnapshot, serverTimestamp }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getAuth, signInAnonymously }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-// ===== CONFIG FIREBASE (remplace par la tienne) =====
 const firebaseConfig = {
   apiKey: "AIzaSyDftr6ZgsFXeqMcbXnpFPe5A3IcmXDIimY",
   authDomain: "among-us-irl-5fe82.firebaseapp.com",
@@ -821,324 +356,203 @@ const app  = initializeApp(firebaseConfig);
 const db   = getFirestore(app);
 const auth = getAuth(app);
 
-// ===== ÉTAT LOCAL =====
-let state = {
-  uid: null,
-  gameId: null,
-  gameCode: null,
-  isOrganizer: false,
-  myRole: null,
-  myAlive: true,
-  myVote: null,
-  myEmergencies: 2,
-  unsubGame: null,
-};
+let state = { uid:null, gameId:null, gameCode:null, isOrganizer:false, unsubGame:null };
+let localTasks = [], localZones = [], localMapBase64 = null;
+let timerInterval = null, selectedVote = null;
 
-// ===== DONNÉES RÔLES =====
 const ROLES = {
-  innocent: { name: 'Innocent', icon: '👤', desc: 'Complète tes tâches et identifie les imposteurs.', class: 'innocent' },
-  impostor: { name: 'Imposteur', icon: '🔪', desc: 'Sabote discrètement et évite d\'être découvert.', class: 'impostor' },
-  detective: { name: 'Détective', icon: '🔍', desc: 'Tu vois si un joueur est marqué "suspect".', class: 'detective' },
+  innocent: { name:'Innocent', icon:'👤', desc:'Complète tes tâches et identifie les imposteurs.', class:'innocent' },
+  impostor: { name:'Imposteur', icon:'🔪', desc:"Sabote discrètement et évite d'être découvert.", class:'impostor' },
+  detective: { name:'Détective', icon:'🔍', desc:'Tu connais le nombre exact d\'imposteurs.', class:'detective' },
 };
 
-// ===== INIT AUTH =====
-let authReady = false;
-signInAnonymously(auth).then(cred => {
-  state.uid = cred.user.uid;
-  authReady = true;
-  // Afficher un indicateur visuel que l'app est prête
-  document.querySelectorAll('.btn-primary').forEach(b => b.style.opacity = '1');
-}).catch(e => showToast('Erreur de connexion : ' + e.message));
+// Auth
+signInAnonymously(auth).then(c => { state.uid = c.user.uid; }).catch(e => showToast('Erreur auth : '+e.message));
 
-// Griser les boutons pendant le chargement
-document.addEventListener('DOMContentLoaded', () => {
-  document.querySelectorAll('.btn-primary').forEach(b => b.style.opacity = '0.6');
-});
+// Utilitaires
+window.showScreen = id => { document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); document.getElementById(id).classList.add('active'); };
+window.showToast  = msg => { const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),3000); };
+window.openModal  = id => document.getElementById(id).classList.add('open');
+window.closeModal = id => document.getElementById(id).classList.remove('open');
+const genCode     = () => Math.random().toString(36).substring(2,8).toUpperCase();
+const getColor    = i  => `color-${i%12}`;
+const getInitial  = n  => n.charAt(0).toUpperCase();
 
-// ===== UTILITAIRES =====
-window.showScreen = (id) => {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
+const ensureAuth = async () => {
+  if (state.uid) return true;
+  try { const c = await signInAnonymously(auth); state.uid = c.user.uid; return true; }
+  catch(e) { showToast('Erreur connexion : '+e.message); return false; }
 };
 
-window.showToast = (msg) => {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 3000);
+// ===== CARTE =====
+window.handleMapUpload = (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = async (ev) => {
+    localMapBase64 = ev.target.result;
+    showMapPreview('lobby-map-container', localMapBase64);
+    // Sauvegarder dans Firebase
+    await updateDoc(doc(db,'games',state.gameId), { mapImage: localMapBase64 });
+    showToast('Carte enregistrée !');
+  };
+  reader.readAsDataURL(file);
 };
 
-window.openModal = (id) => document.getElementById(id).classList.add('open');
-window.closeModal = (id) => document.getElementById(id).classList.remove('open');
+function showMapPreview(containerId, base64) {
+  const c = document.getElementById(containerId);
+  if (!base64) { c.innerHTML='<div class="map-placeholder">Aucune carte</div>'; return; }
+  c.innerHTML = `<img src="${base64}" alt="Carte du jeu" style="width:100%;height:auto;display:block;border-radius:var(--radius)"/>`;
+}
 
-const genCode = () => Math.random().toString(36).substring(2, 8).toUpperCase();
-
-const getColor = (idx) => `color-${idx % 12}`;
-
-const getInitial = (name) => name.charAt(0).toUpperCase();
-
-// ===== CRÉER UNE PARTIE =====
+// ===== CRÉER =====
 window.createGame = async () => {
   const name = document.getElementById('create-name').value.trim();
   if (!name) return showToast('Entre ton prénom !');
-  // Attendre auth si pas encore prête
-  if (!state.uid) {
-    showToast('Connexion en cours…');
-    try {
-      const cred = await signInAnonymously(auth);
-      state.uid = cred.user.uid;
-    } catch(e) {
-      return showToast('Erreur : ' + e.message);
-    }
-  }
+  if (!await ensureAuth()) return;
 
   const code = genCode();
-  const gameId = code;
   const impostors = parseInt(document.getElementById('create-impostors').value);
   const duration  = parseInt(document.getElementById('create-duration').value);
   const meetings  = parseInt(document.getElementById('create-meetings').value);
   const detectiveEnabled = document.getElementById('role-detective').checked;
 
-  const gameData = {
-    code,
-    status: 'lobby',
-    createdAt: serverTimestamp(),
-    config: { impostors, duration, meetings, detectiveEnabled },
-    tasks: [],
-    zones: [],
-    progress: { completed: 0, total: 0 },
-    meeting: null,
-    votes: {},
-    endReason: null,
-  };
+  // Joueur organisateur stocké directement dans le doc
+  const mePlayer = { uid:state.uid, name, role:null, alive:true, isOrganizer:true, myTasks:[], emergenciesLeft:meetings, colorIdx:0 };
 
-  const playerData = {
-    name,
-    uid: state.uid,
-    role: null,
-    alive: true,
-    isOrganizer: true,
-    tasksCompleted: [],
-    emergenciesLeft: meetings,
-    vote: null,
-    colorIdx: 0,
-  };
+  await setDoc(doc(db,'games',code), {
+    code, status:'lobby', createdAt:serverTimestamp(),
+    config:{ impostors, duration, meetings, detectiveEnabled },
+    tasks:[], zones:[], mapImage:null,
+    progress:{ completed:0, total:0 },
+    meeting:null, endReason:null, winner:null,
+    players:{ [state.uid]: mePlayer }   // ← joueurs dans le doc principal
+  });
 
-  await setDoc(doc(db, 'games', gameId), gameData);
-  await setDoc(doc(db, 'games', gameId, 'players', state.uid), playerData);
-
-  state.gameId = gameId;
-  state.gameCode = code;
-  state.isOrganizer = true;
-  state.myEmergencies = meetings;
-
+  state.gameId = code; state.gameCode = code; state.isOrganizer = true;
   enterLobby();
 };
 
-// ===== REJOINDRE UNE PARTIE =====
+// ===== REJOINDRE =====
 window.joinGame = async () => {
   const code = document.getElementById('join-code').value.trim().toUpperCase();
   const name = document.getElementById('join-name').value.trim();
-  if (!code || code.length !== 6) return showToast('Code invalide (6 caractères)');
+  if (!code || code.length !== 6) return showToast('Code invalide');
   if (!name) return showToast('Entre ton prénom !');
-  if (!state.uid) {
-    showToast('Connexion en cours…');
-    try {
-      const cred = await signInAnonymously(auth);
-      state.uid = cred.user.uid;
-    } catch(e) {
-      return showToast('Erreur : ' + e.message);
-    }
-  }
+  if (!await ensureAuth()) return;
 
-  const gameRef = doc(db, 'games', code);
+  const gameRef = doc(db,'games',code);
   const snap = await getDoc(gameRef);
   if (!snap.exists()) return showToast('Partie introuvable !');
-  const gameData = snap.data();
-  if (gameData.status !== 'lobby') return showToast('Cette partie a déjà commencé.');
+  const data = snap.data();
+  if (data.status !== 'lobby') return showToast('Partie déjà commencée.');
 
-  // Compter les joueurs existants pour la couleur
-  const playersSnap = await getDoc(doc(db, 'games', code, 'players', state.uid));
-  const playerCount = Object.keys(gameData.players || {}).length;
+  const existingPlayers = data.players || {};
+  if (existingPlayers[state.uid]) {
+    // Déjà dans la partie
+    state.gameId = code; state.gameCode = code; state.isOrganizer = false;
+    enterLobby(); return;
+  }
 
-  const playerData = {
-    name,
-    uid: state.uid,
-    role: null,
-    alive: true,
-    isOrganizer: false,
-    tasksCompleted: [],
-    emergenciesLeft: gameData.config.meetings,
-    vote: null,
-    colorIdx: playerCount,
-  };
+  const colorIdx = Object.keys(existingPlayers).length;
+  const mePlayer = { uid:state.uid, name, role:null, alive:true, isOrganizer:false, myTasks:[], emergenciesLeft:data.config.meetings, colorIdx };
 
-  await setDoc(doc(db, 'games', code, 'players', state.uid), playerData);
+  await updateDoc(gameRef, { [`players.${state.uid}`]: mePlayer });
 
-  state.gameId = code;
-  state.gameCode = code;
-  state.isOrganizer = false;
-  state.myEmergencies = gameData.config.meetings;
-
+  state.gameId = code; state.gameCode = code; state.isOrganizer = false;
   enterLobby();
 };
 
-// ===== ENTRER DANS LE LOBBY =====
+// ===== LOBBY =====
 function enterLobby() {
   showScreen('screen-lobby');
   document.getElementById('lobby-code').textContent = state.gameCode;
-
-  if (state.isOrganizer) {
-    document.getElementById('lobby-org-badge').style.display = 'inline-block';
-    document.getElementById('lobby-org-controls').style.display = 'block';
-    document.getElementById('lobby-player-wait').style.display = 'none';
-    renderTasksConfig([]);
-    renderZonesConfig([]);
-  } else {
-    document.getElementById('lobby-org-controls').style.display = 'none';
-    document.getElementById('lobby-player-wait').style.display = 'block';
-  }
-
+  document.getElementById('lobby-org-badge').style.display = state.isOrganizer ? 'inline-block' : 'none';
+  document.getElementById('lobby-org-controls').style.display = state.isOrganizer ? 'block' : 'none';
+  document.getElementById('lobby-player-wait').style.display = state.isOrganizer ? 'none' : 'block';
   subscribeToGame();
 }
 
-// ===== ÉCOUTE TEMPS RÉEL =====
+// ===== SNAPSHOT TEMPS RÉEL =====
 function subscribeToGame() {
   if (state.unsubGame) state.unsubGame();
-
-  const gameRef = doc(db, 'games', state.gameId);
-  state.unsubGame = onSnapshot(gameRef, async (snap) => {
+  state.unsubGame = onSnapshot(doc(db,'games',state.gameId), snap => {
     if (!snap.exists()) return;
     const data = snap.data();
-
-    // Récupérer les joueurs (sous-collection)
-    // On les lit via snapshot séparé — simplification : on les stocke dans le doc principal
-    // Pour simplifier, les joueurs seront stockés dans players:{uid: {...}} dans le doc
     const players = data.players || {};
 
-    // Mise à jour du lobby
     if (data.status === 'lobby') {
-      const pList = Object.values(players);
-      document.getElementById('lobby-count').textContent = pList.length;
-      renderLobbyPlayers(pList);
+      const list = Object.values(players);
+      document.getElementById('lobby-count').textContent = list.length;
+      renderLobbyPlayers(list);
       if (state.isOrganizer) {
-        renderTasksConfig(data.tasks || []);
-        renderZonesConfig(data.zones || []);
+        localTasks = data.tasks || []; localZones = data.zones || [];
+        renderTasksConfig(localTasks); renderZonesConfig(localZones);
+        if (data.mapImage) showMapPreview('lobby-map-container', data.mapImage);
       }
     }
-
-    // Lancement de la partie
     if (data.status === 'playing') {
       const me = players[state.uid];
       if (!me) return;
-      state.myRole = me.role;
-      state.myAlive = me.alive;
-      state.myEmergencies = me.emergenciesLeft;
+      if (!me.alive) { enterDeadMode(data, players); return; }
       enterGame(data, me, players);
     }
-
-    // Réunion
-    if (data.status === 'meeting') {
-      const me = players[state.uid];
-      enterMeeting(data, me, players);
-    }
-
-    // Résultats
-    if (data.status === 'vote_results') {
-      showVoteResults(data, players);
-    }
-
-    // Fin
-    if (data.status === 'ended') {
-      showEndScreen(data, players);
-    }
+    if (data.status === 'meeting') { enterMeeting(data, players[state.uid], players); }
+    if (data.status === 'vote_results') { showVoteResults(data, players); }
+    if (data.status === 'ended') { showEndScreen(data, players); }
   });
 }
 
-// ===== RENDER LOBBY PLAYERS =====
+// ===== RENDER LOBBY =====
 function renderLobbyPlayers(players) {
-  const el = document.getElementById('lobby-players-list');
-  el.innerHTML = players.map((p, i) => `
+  document.getElementById('lobby-players-list').innerHTML = players.map((p,i) => `
     <div class="player-item">
-      <div class="player-avatar ${getColor(p.colorIdx ?? i)}">${getInitial(p.name)}</div>
-      <div class="player-info">
-        <div class="player-name">${p.name}</div>
-        <div class="player-status">${p.isOrganizer ? 'Organisateur' : 'Joueur'}</div>
-      </div>
-      ${p.isOrganizer ? '<span class="player-badge badge-org">ORGA</span>' : ''}
-    </div>
-  `).join('');
+      <div class="player-avatar ${getColor(p.colorIdx??i)}">${getInitial(p.name)}</div>
+      <div class="player-info"><div class="player-name">${p.name}</div><div class="player-status">${p.isOrganizer?'Organisateur':'Joueur'}</div></div>
+      ${p.isOrganizer?'<span class="player-badge badge-org">ORGA</span>':''}
+    </div>`).join('');
 }
 
-// ===== CONFIG TÂCHES =====
-let localTasks = [];
-let localZones = [];
-
+// ===== TÂCHES CONFIG =====
 function renderTasksConfig(tasks) {
-  localTasks = tasks;
   const el = document.getElementById('tasks-config-list');
-  if (!tasks.length) {
-    el.innerHTML = '<p style="color:var(--text2);font-size:14px;margin-bottom:8px">Aucune tâche. Ajoutes-en au moins une !</p>';
-    return;
-  }
-  el.innerHTML = tasks.map((t, i) => `
+  if (!tasks.length) { el.innerHTML='<p style="color:var(--text2);font-size:14px;margin-bottom:8px">Aucune tâche.</p>'; return; }
+  el.innerHTML = tasks.map((t,i) => `
     <div class="task-item">
       <div class="task-check">📋</div>
-      <div class="task-info">
-        <div class="task-name">${t.name}</div>
-        <div class="task-zone">📍 ${t.zone}</div>
-        <span class="task-diff diff-${t.difficulty}">${t.difficulty === 'easy' ? 'Facile' : t.difficulty === 'medium' ? 'Moyen' : 'Difficile'}</span>
-      </div>
+      <div class="task-info"><div class="task-name">${t.name}</div><div class="task-zone">📍 ${t.zone}</div>
+        <span class="task-diff diff-${t.difficulty}">${t.difficulty==='easy'?'Facile':t.difficulty==='medium'?'Moyen':'Difficile'}</span></div>
       <button class="btn btn-secondary btn-sm" onclick="removeTask(${i})" style="padding:6px 10px">🗑️</button>
-    </div>
-  `).join('');
+    </div>`).join('');
 }
 
 function renderZonesConfig(zones) {
-  localZones = zones;
   const el = document.getElementById('zones-config-list');
-  if (!zones.length) {
-    el.innerHTML = '<p style="color:var(--text2);font-size:14px;margin-bottom:8px">Aucune zone définie.</p>';
-    return;
-  }
-  el.innerHTML = zones.map((z, i) => `
+  if (!zones.length) { el.innerHTML='<p style="color:var(--text2);font-size:14px;margin-bottom:8px">Aucune zone.</p>'; return; }
+  el.innerHTML = zones.map((z,i) => `
     <div class="map-zone map-zone-${z.type}">
       <div class="map-zone-dot"></div>
       <span style="flex:1;font-weight:600">${z.name}</span>
-      <span style="font-size:12px;color:var(--text2)">${z.type === 'forbidden' ? '⛔ Interdit' : z.type === 'special' ? '⭐ Spécial' : 'Normal'}</span>
+      <span style="font-size:12px;color:var(--text2)">${z.type==='forbidden'?'⛔':z.type==='special'?'⭐':''}</span>
       <button onclick="removeZone(${i})" style="background:none;border:none;color:var(--text2);font-size:16px;cursor:pointer;margin-left:8px">✕</button>
-    </div>
-  `).join('');
+    </div>`).join('');
 }
-
-window.openAddTask  = () => openModal('modal-add-task');
-window.openAddZone  = () => openModal('modal-add-zone');
 
 window.addTask = async () => {
   const name = document.getElementById('task-name-input').value.trim();
   const desc = document.getElementById('task-desc-input').value.trim();
   const zone = document.getElementById('task-zone-input').value.trim();
   const difficulty = document.getElementById('task-diff-input').value;
-  if (!name || !zone) return showToast('Nom et zone obligatoires');
-
-  const task = { id: Date.now().toString(), name, desc, zone, difficulty, done: false };
-  localTasks.push(task);
-  await updateDoc(doc(db, 'games', state.gameId), {
-    tasks: localTasks,
-    'progress.total': localTasks.length,
-  });
+  if (!name||!zone) return showToast('Nom et zone obligatoires');
+  localTasks.push({ id:Date.now().toString(), name, desc, zone, difficulty });
+  await updateDoc(doc(db,'games',state.gameId), { tasks:localTasks, 'progress.total':localTasks.length });
   closeModal('modal-add-task');
-  document.getElementById('task-name-input').value = '';
-  document.getElementById('task-desc-input').value = '';
-  document.getElementById('task-zone-input').value = '';
+  ['task-name-input','task-desc-input','task-zone-input'].forEach(id=>document.getElementById(id).value='');
 };
 
-window.removeTask = async (i) => {
-  localTasks.splice(i, 1);
-  await updateDoc(doc(db, 'games', state.gameId), {
-    tasks: localTasks,
-    'progress.total': localTasks.length,
-  });
+window.removeTask = async i => {
+  localTasks.splice(i,1);
+  await updateDoc(doc(db,'games',state.gameId), { tasks:localTasks, 'progress.total':localTasks.length });
 };
 
 window.addZone = async () => {
@@ -1146,570 +560,330 @@ window.addZone = async () => {
   const type = document.getElementById('zone-type-input').value;
   if (!name) return showToast('Nomme la zone !');
   localZones.push({ name, type });
-  await updateDoc(doc(db, 'games', state.gameId), { zones: localZones });
+  await updateDoc(doc(db,'games',state.gameId), { zones:localZones });
   closeModal('modal-add-zone');
-  document.getElementById('zone-name-input').value = '';
+  document.getElementById('zone-name-input').value='';
 };
 
-window.removeZone = async (i) => {
-  localZones.splice(i, 1);
-  await updateDoc(doc(db, 'games', state.gameId), { zones: localZones });
+window.removeZone = async i => {
+  localZones.splice(i,1);
+  await updateDoc(doc(db,'games',state.gameId), { zones:localZones });
 };
 
-// ===== LANCER LA PARTIE =====
+// ===== LANCER =====
 window.startGame = async () => {
-  const gameRef = doc(db, 'games', state.gameId);
-  const snap = await getDoc(gameRef);
+  const snap = await getDoc(doc(db,'games',state.gameId));
   const data = snap.data();
   const players = data.players || {};
   const playersList = Object.entries(players);
-
   if (playersList.length < 2) return showToast('Il faut au moins 2 joueurs !');
-  if ((data.tasks || []).length === 0) return showToast('Ajoute au moins une tâche !');
+  if (!data.tasks || data.tasks.length === 0) return showToast('Ajoute au moins une tâche !');
 
-  // Attribution des rôles
   const count = playersList.length;
-  const impostorCount = Math.min(data.config.impostors, Math.floor(count / 2));
-  const detectiveEnabled = data.config.detectiveEnabled;
-
-  let roles = [];
-  for (let i = 0; i < impostorCount; i++) roles.push('impostor');
-  if (detectiveEnabled && count > impostorCount + 1) roles.push('detective');
+  const impostorCount = Math.min(data.config.impostors, Math.floor(count/2));
+  let roles = Array(impostorCount).fill('impostor');
+  if (data.config.detectiveEnabled && count > impostorCount+1) roles.push('detective');
   while (roles.length < count) roles.push('innocent');
+  roles.sort(()=>Math.random()-0.5);
 
-  // Mélanger
-  roles.sort(() => Math.random() - 0.5);
-  const shuffledPlayers = [...playersList].sort(() => Math.random() - 0.5);
-
-  // Distribuer les tâches (chaque joueur reçoit 3 tâches max parmi toutes)
-  const tasks = data.tasks || [];
+  const shuffled = [...playersList].sort(()=>Math.random()-0.5);
   const updatedPlayers = {};
-
-  shuffledPlayers.forEach(([uid, player], i) => {
-    const role = roles[i];
-    // Distribuer les tâches : mélanger et prendre les N premières
-    const shuffledTasks = [...tasks].sort(() => Math.random() - 0.5);
-    const myTasks = shuffledTasks.slice(0, Math.min(tasks.length, 3)).map(t => ({
-      ...t, done: false
-    }));
-
-    updatedPlayers[uid] = {
-      ...player,
-      role,
-      tasksCompleted: [],
-      myTasks,
-    };
+  shuffled.forEach(([uid,player],i) => {
+    const myTasks = [...data.tasks].sort(()=>Math.random()-0.5).slice(0,Math.min(data.tasks.length,3));
+    updatedPlayers[uid] = { ...player, role:roles[i], myTasks };
   });
 
-  // Calculer le total de tâches (toutes confondues)
-  const totalTasks = tasks.length;
-
-  await updateDoc(gameRef, {
-    status: 'playing',
-    players: updatedPlayers,
-    startedAt: serverTimestamp(),
-    'progress.total': totalTasks,
-    'progress.completed': 0,
+  await updateDoc(doc(db,'games',state.gameId), {
+    status:'playing', players:updatedPlayers,
+    startedAt:serverTimestamp(), 'progress.completed':0, 'progress.total':data.tasks.length
   });
 };
 
-// ===== ENTRER DANS LE JEU =====
+// ===== JEU =====
 function enterGame(data, me, players) {
-  if (!me.alive) {
-    enterDeadMode(data, players);
-    return;
-  }
-
   showScreen('screen-game');
   document.getElementById('admin-btn').classList.toggle('visible', state.isOrganizer);
-
-  // Rôle
-  const role = ROLES[me.role] || ROLES.innocent;
-  const roleCard = document.getElementById('role-card-display');
-  roleCard.className = `role-card ${role.class}`;
+  const role = ROLES[me.role]||ROLES.innocent;
+  const rc = document.getElementById('role-card-display');
+  rc.className = `role-card ${role.class}`;
   document.getElementById('role-icon').textContent = role.icon;
   document.getElementById('role-name').textContent = role.name;
-  document.getElementById('role-desc').textContent = role.desc;
+  document.getElementById('role-desc').textContent = role.desc + (me.role==='detective' ? ` Il y a ${Object.values(players).filter(p=>p.role==='impostor').length} imposteur(s).` : '');
   document.getElementById('game-player-name').textContent = me.name;
-
-  // Détective : info suspects
-  if (me.role === 'detective') {
-    const suspectCount = Object.values(players).filter(p => p.role === 'impostor').length;
-    document.getElementById('role-desc').textContent += ` Il y a ${suspectCount} imposteur(s).`;
-  }
-
-  // Jauge
   updateProgress(data.progress);
+  document.getElementById('emergency-left').textContent = me.emergenciesLeft ?? 2;
 
-  // Timer
-  if (data.config.duration > 0) {
-    document.getElementById('timer-card').style.display = 'block';
+  if (data.config.duration > 0 && data.startedAt) {
+    document.getElementById('timer-card').style.display='block';
     startTimer(data.startedAt, data.config.duration);
   }
 
-  // Réunions d'urgence
-  document.getElementById('emergency-left').textContent = me.emergenciesLeft ?? state.myEmergencies;
-
-  // Tâches du joueur
-  renderPlayerTasks(me.myTasks || []);
+  // Carte
+  showMapPreview('game-map-container', data.mapImage||null);
 
   // Zones
-  renderGameZones(data.zones || []);
+  const zonesEl = document.getElementById('game-zones-list');
+  zonesEl.innerHTML = (data.zones||[]).map(z=>`
+    <div class="map-zone map-zone-${z.type}">
+      <div class="map-zone-dot"></div>
+      <span style="flex:1;font-weight:600">${z.name}</span>
+      <span style="font-size:12px;color:var(--text2)">${z.type==='forbidden'?'⛔ Interdit':z.type==='special'?'⭐ Spécial':''}</span>
+    </div>`).join('');
+
+  // Tâches
+  renderPlayerTasks(me.myTasks||[]);
 
   // Joueurs
-  renderGamePlayers(players, me);
-}
-
-function updateProgress(progress) {
-  const pct = progress.total > 0 ? Math.round((progress.completed / progress.total) * 100) : 0;
-  document.getElementById('progress-fill').style.width = pct + '%';
-  document.getElementById('progress-text').textContent = `${progress.completed} / ${progress.total} tâches`;
-  document.getElementById('progress-pct').textContent = pct + '%';
+  document.getElementById('game-players-list').innerHTML = Object.values(players).map((p,i)=>`
+    <div class="player-item">
+      <div class="player-avatar ${getColor(p.colorIdx??i)}">${getInitial(p.name)}</div>
+      <div class="player-info"><div class="player-name">${p.name}${p.uid===state.uid?' (toi)':''}</div></div>
+      <span class="player-badge ${p.alive?'badge-alive':'badge-dead'}">${p.alive?'EN VIE':'MORT'}</span>
+    </div>`).join('');
 }
 
 function renderPlayerTasks(tasks) {
   const el = document.getElementById('player-tasks-list');
-  if (!tasks.length) {
-    el.innerHTML = '<p style="color:var(--text2);font-size:14px">Aucune tâche assignée.</p>';
-    return;
-  }
-  el.innerHTML = tasks.map((t, i) => `
-    <div class="task-item ${t.done ? 'done' : ''}" onclick="toggleTask(${i})">
-      <div class="task-check">${t.done ? '✓' : ''}</div>
+  if (!tasks.length) { el.innerHTML='<p style="color:var(--text2);font-size:14px">Aucune tâche.</p>'; return; }
+  el.innerHTML = tasks.map((t,i)=>`
+    <div class="task-item ${t.done?'done':''}" onclick="toggleTask(${i})">
+      <div class="task-check">${t.done?'✓':''}</div>
       <div class="task-info">
         <div class="task-name">${t.name}</div>
-        <div class="task-zone">📍 ${t.zone} — ${t.desc || ''}</div>
-        <span class="task-diff diff-${t.difficulty}">${t.difficulty === 'easy' ? 'Facile' : t.difficulty === 'medium' ? 'Moyen' : 'Difficile'}</span>
+        <div class="task-zone">📍 ${t.zone} — ${t.desc||''}</div>
+        <span class="task-diff diff-${t.difficulty}">${t.difficulty==='easy'?'Facile':t.difficulty==='medium'?'Moyen':'Difficile'}</span>
       </div>
-    </div>
-  `).join('');
+    </div>`).join('');
 }
 
-function renderGameZones(zones) {
-  const el = document.getElementById('game-zones-list');
-  if (!zones.length) {
-    el.innerHTML = '<p style="color:var(--text2);font-size:14px">Aucune zone définie.</p>';
-    return;
-  }
-  el.innerHTML = zones.map(z => `
-    <div class="map-zone map-zone-${z.type}">
-      <div class="map-zone-dot"></div>
-      <span style="flex:1;font-weight:600">${z.name}</span>
-      <span style="font-size:12px;color:var(--text2)">${z.type === 'forbidden' ? '⛔ Interdit' : z.type === 'special' ? '⭐ Spécial' : ''}</span>
-    </div>
-  `).join('');
+function updateProgress(progress) {
+  const pct = progress.total>0 ? Math.round(progress.completed/progress.total*100) : 0;
+  ['','dead-'].forEach(prefix=>{
+    const fill=document.getElementById(prefix+'progress-fill'); if(fill) fill.style.width=pct+'%';
+    const txt=document.getElementById(prefix+'progress-text'); if(txt) txt.textContent=`${progress.completed} / ${progress.total} tâches`;
+    const p=document.getElementById(prefix+'progress-pct'); if(p) p.textContent=pct+'%';
+  });
 }
 
-function renderGamePlayers(players, me) {
-  const el = document.getElementById('game-players-list');
-  el.innerHTML = Object.values(players).map((p, i) => `
-    <div class="player-item">
-      <div class="player-avatar ${getColor(p.colorIdx ?? i)}">${getInitial(p.name)}</div>
-      <div class="player-info">
-        <div class="player-name">${p.name} ${p.uid === me.uid ? '(toi)' : ''}</div>
-        <div class="player-status">${p.isOrganizer ? '👑 Organisateur' : ''}</div>
-      </div>
-      <span class="player-badge ${p.alive ? 'badge-alive' : 'badge-dead'}">${p.alive ? 'EN VIE' : 'MORT'}</span>
-    </div>
-  `).join('');
-}
-
-// ===== COCHER UNE TÂCHE =====
-window.toggleTask = async (idx) => {
-  const gameRef = doc(db, 'games', state.gameId);
-  const snap = await getDoc(gameRef);
+window.toggleTask = async idx => {
+  const snap = await getDoc(doc(db,'games',state.gameId));
   const data = snap.data();
   const me = data.players[state.uid];
-  if (!me || !me.alive) return;
-
-  const tasks = [...(me.myTasks || [])];
-  if (tasks[idx].done) return; // Pas de dé-cochage
-
+  if (!me||!me.alive) return;
+  const tasks = [...(me.myTasks||[])];
+  if (tasks[idx].done) return;
   tasks[idx].done = true;
 
-  // Calculer la progression globale (nb tâches cochées par tous les joueurs)
-  const allPlayers = data.players;
   let completed = 0;
-  Object.values(allPlayers).forEach(p => {
-    if (p.uid === state.uid) {
-      completed += tasks.filter(t => t.done).length;
-    } else {
-      completed += (p.myTasks || []).filter(t => t.done).length;
-    }
+  Object.entries(data.players).forEach(([uid,p]) => {
+    const t = uid===state.uid ? tasks : (p.myTasks||[]);
+    completed += t.filter(x=>x.done).length;
   });
 
-  const total = data.progress.total;
-
-  await updateDoc(gameRef, {
-    [`players.${state.uid}.myTasks`]: tasks,
-    'progress.completed': completed,
-  });
-
-  // Vérifier victoire innocents (tâches)
-  if (completed >= total) {
-    await updateDoc(gameRef, {
-      status: 'ended',
-      endReason: 'tasks_complete',
-      winner: 'innocents',
-    });
+  await updateDoc(doc(db,'games',state.gameId), { [`players.${state.uid}.myTasks`]:tasks, 'progress.completed':completed });
+  if (completed >= data.progress.total) {
+    await updateDoc(doc(db,'games',state.gameId), { status:'ended', endReason:'tasks_complete', winner:'innocents' });
   }
 };
 
-// ===== TIMER =====
-let timerInterval = null;
 function startTimer(startedAt, durationMin) {
   if (timerInterval) clearInterval(timerInterval);
-  timerInterval = setInterval(async () => {
-    if (!startedAt) return;
+  timerInterval = setInterval(async()=>{
     const startMs = startedAt.toMillis ? startedAt.toMillis() : Date.now();
-    const elapsed = Date.now() - startMs;
-    const total   = durationMin * 60 * 1000;
-    const remaining = total - elapsed;
-
-    if (remaining <= 0) {
+    const remaining = durationMin*60000 - (Date.now()-startMs);
+    if (remaining<=0) {
       clearInterval(timerInterval);
-      document.getElementById('timer-display').textContent = '00:00';
-      // Imposteurs gagnent si temps écoulé
-      await updateDoc(doc(db, 'games', state.gameId), {
-        status: 'ended',
-        endReason: 'timeout',
-        winner: 'impostors',
-      });
+      document.getElementById('timer-display').textContent='00:00';
+      await updateDoc(doc(db,'games',state.gameId),{status:'ended',endReason:'timeout',winner:'impostors'});
       return;
     }
-
-    const min = Math.floor(remaining / 60000);
-    const sec = Math.floor((remaining % 60000) / 1000);
-    document.getElementById('timer-display').textContent =
-      `${String(min).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
-  }, 1000);
+    const m=Math.floor(remaining/60000), s=Math.floor(remaining%60000/1000);
+    document.getElementById('timer-display').textContent=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  },1000);
 }
 
-// ===== SIGNALER UN CORPS =====
 window.reportBody = async () => {
-  if (!confirm('Signaler un corps ? La réunion va commencer.')) return;
-  await updateDoc(doc(db, 'games', state.gameId), {
-    status: 'meeting',
-    meeting: { type: 'body', calledBy: state.uid, votes: {} },
-  });
+  if (!confirm('Signaler un corps ?')) return;
+  await updateDoc(doc(db,'games',state.gameId),{status:'meeting',meeting:{type:'body',calledBy:state.uid,votes:{}}});
 };
 
-// ===== RÉUNION D'URGENCE =====
 window.callEmergencyMeeting = async () => {
-  const gameRef = doc(db, 'games', state.gameId);
-  const snap = await getDoc(gameRef);
+  const snap = await getDoc(doc(db,'games',state.gameId));
   const me = snap.data().players[state.uid];
-  if (!me.emergenciesLeft || me.emergenciesLeft <= 0) return showToast('Plus de réunions d\'urgence !');
-
-  await updateDoc(gameRef, {
-    status: 'meeting',
-    meeting: { type: 'emergency', calledBy: state.uid, votes: {} },
-    [`players.${state.uid}.emergenciesLeft`]: me.emergenciesLeft - 1,
+  if (!me.emergenciesLeft||me.emergenciesLeft<=0) return showToast('Plus de réunions !');
+  await updateDoc(doc(db,'games',state.gameId),{
+    status:'meeting', meeting:{type:'emergency',calledBy:state.uid,votes:{}},
+    [`players.${state.uid}.emergenciesLeft`]:me.emergenciesLeft-1
   });
 };
 
-// ===== DÉCLARER MORT =====
 window.declareDead = async () => {
   if (!confirm('Confirmer ? Tu seras hors-jeu.')) return;
-  const gameRef = doc(db, 'games', state.gameId);
-  await updateDoc(gameRef, {
-    [`players.${state.uid}.alive`]: false,
-  });
-
-  // Vérifier condition victoire imposteurs
-  const snap = await getDoc(gameRef);
-  const data = snap.data();
-  checkWinCondition(data);
-
-  enterDeadMode(data, data.players);
+  await updateDoc(doc(db,'games',state.gameId),{[`players.${state.uid}.alive`]:false});
+  const snap = await getDoc(doc(db,'games',state.gameId));
+  checkWin(snap.data());
 };
 
-// ===== MODE MORT =====
 function enterDeadMode(data, players) {
-  if (timerInterval) clearInterval(timerInterval);
-  document.getElementById('admin-btn').classList.toggle('visible', state.isOrganizer);
+  if(timerInterval) clearInterval(timerInterval);
+  document.getElementById('admin-btn').classList.toggle('visible',state.isOrganizer);
   showScreen('screen-dead');
-  updateDeadProgress(data.progress);
-  renderDeadPlayers(players);
-}
-
-function updateDeadProgress(progress) {
-  const pct = progress.total > 0 ? Math.round((progress.completed / progress.total) * 100) : 0;
-  document.getElementById('dead-progress-fill').style.width = pct + '%';
-  document.getElementById('dead-progress-text').textContent = `${progress.completed} / ${progress.total} tâches`;
-  document.getElementById('dead-progress-pct').textContent = pct + '%';
-}
-
-function renderDeadPlayers(players) {
-  const el = document.getElementById('dead-players-list');
-  el.innerHTML = Object.values(players).map((p, i) => `
+  updateProgress(data.progress);
+  document.getElementById('dead-players-list').innerHTML = Object.values(players).map((p,i)=>`
     <div class="player-item">
-      <div class="player-avatar ${getColor(p.colorIdx ?? i)}">${getInitial(p.name)}</div>
+      <div class="player-avatar ${getColor(p.colorIdx??i)}">${getInitial(p.name)}</div>
       <div class="player-info"><div class="player-name">${p.name}</div></div>
-      <span class="player-badge ${p.alive ? 'badge-alive' : 'badge-dead'}">${p.alive ? 'EN VIE' : 'MORT'}</span>
-    </div>
-  `).join('');
+      <span class="player-badge ${p.alive?'badge-alive':'badge-dead'}">${p.alive?'EN VIE':'MORT'}</span>
+    </div>`).join('');
 }
 
-// ===== RÉUNION / VOTE =====
-let selectedVote = null;
-
+// ===== VOTE =====
 function enterMeeting(data, me, players) {
-  if (timerInterval) clearInterval(timerInterval);
+  if(timerInterval) clearInterval(timerInterval);
   showScreen('screen-meeting');
-  selectedVote = null;
+  selectedVote=null;
+  const meeting=data.meeting||{};
+  document.getElementById('meeting-icon').textContent = meeting.type==='emergency'?'🚨':'🔴';
+  document.getElementById('meeting-title').textContent = meeting.type==='emergency'?'Réunion d\'urgence !':'Corps signalé !';
 
-  const meeting = data.meeting || {};
-  const icon  = meeting.type === 'emergency' ? '🚨' : '🔴';
-  const title = meeting.type === 'emergency' ? 'Réunion d\'urgence !' : 'Corps signalé !';
-  document.getElementById('meeting-icon').textContent  = icon;
-  document.getElementById('meeting-title').textContent = title;
-
-  if (!me || !me.alive) {
-    document.getElementById('meeting-alive-only').style.display = 'none';
-    document.getElementById('meeting-dead-msg').style.display = 'block';
-    document.getElementById('vote-waiting').style.display = 'none';
+  if (!me||!me.alive) {
+    document.getElementById('meeting-alive-only').style.display='none';
+    document.getElementById('meeting-dead-msg').style.display='block';
+    document.getElementById('vote-waiting').style.display='none';
     return;
   }
-
-  // Déjà voté ?
-  const myVote = (meeting.votes || {})[state.uid];
-  if (myVote) {
-    document.getElementById('meeting-alive-only').style.display = 'none';
-    document.getElementById('vote-waiting').style.display = 'block';
-    document.getElementById('meeting-dead-msg').style.display = 'none';
+  if ((meeting.votes||{})[state.uid]) {
+    document.getElementById('meeting-alive-only').style.display='none';
+    document.getElementById('vote-waiting').style.display='block';
+    document.getElementById('meeting-dead-msg').style.display='none';
     return;
   }
+  document.getElementById('meeting-alive-only').style.display='block';
+  document.getElementById('vote-waiting').style.display='none';
+  document.getElementById('meeting-dead-msg').style.display='none';
 
-  document.getElementById('meeting-alive-only').style.display = 'block';
-  document.getElementById('vote-waiting').style.display = 'none';
-  document.getElementById('meeting-dead-msg').style.display = 'none';
-
-  // Liste des joueurs à voter
-  const alivePlayers = Object.values(players).filter(p => p.alive && p.uid !== state.uid);
-  const el = document.getElementById('vote-players-list');
-  el.innerHTML = alivePlayers.map((p, i) => `
+  const alive = Object.values(players).filter(p=>p.alive&&p.uid!==state.uid);
+  document.getElementById('vote-players-list').innerHTML = alive.map((p,i)=>`
     <div class="vote-item" id="vote-${p.uid}" onclick="selectVote('${p.uid}')">
-      <div class="player-avatar ${getColor(p.colorIdx ?? i)}" style="width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800">${getInitial(p.name)}</div>
-      <div class="player-info">
-        <div class="player-name">${p.name}</div>
-      </div>
-    </div>
-  `).join('');
+      <div class="player-avatar ${getColor(p.colorIdx??i)}" style="width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800">${getInitial(p.name)}</div>
+      <div class="player-info"><div class="player-name">${p.name}</div></div>
+    </div>`).join('');
 }
 
-window.selectVote = (uid) => {
-  selectedVote = uid;
-  document.querySelectorAll('.vote-item').forEach(el => el.classList.remove('selected'));
-  const target = uid === 'skip' ? document.getElementById('vote-skip') : document.getElementById(`vote-${uid}`);
-  if (target) target.classList.add('selected');
-  document.getElementById('btn-confirm-vote').disabled = false;
+window.selectVote = uid => {
+  selectedVote=uid;
+  document.querySelectorAll('.vote-item').forEach(e=>e.classList.remove('selected'));
+  const t = uid==='skip' ? document.getElementById('vote-skip') : document.getElementById(`vote-${uid}`);
+  if(t) t.classList.add('selected');
+  document.getElementById('btn-confirm-vote').disabled=false;
 };
-
-window.castVote = (uid) => window.selectVote(uid);
+window.castVote = uid => window.selectVote(uid);
 
 window.confirmVote = async () => {
   if (!selectedVote) return;
-  const gameRef = doc(db, 'games', state.gameId);
-  await updateDoc(gameRef, {
-    [`meeting.votes.${state.uid}`]: selectedVote,
-  });
+  const gameRef = doc(db,'games',state.gameId);
+  await updateDoc(gameRef,{ [`meeting.votes.${state.uid}`]:selectedVote });
+  document.getElementById('meeting-alive-only').style.display='none';
+  document.getElementById('vote-waiting').style.display='block';
 
-  document.getElementById('meeting-alive-only').style.display = 'none';
-  document.getElementById('vote-waiting').style.display = 'block';
-
-  // Vérifier si tous ont voté → calculer résultats
   const snap = await getDoc(gameRef);
   const data = snap.data();
-  const alivePlayers = Object.values(data.players).filter(p => p.alive);
-  const votes = data.meeting?.votes || {};
-  const votersCount = Object.keys(votes).length;
-
-  if (votersCount >= alivePlayers.length) {
-    await computeVoteResults(gameRef, data);
-  }
+  const alive = Object.values(data.players).filter(p=>p.alive);
+  const votes = data.meeting?.votes||{};
+  if (Object.keys(votes).length >= alive.length) await computeVoteResults(gameRef,data);
 };
 
-// ===== CALCUL RÉSULTATS VOTE =====
 async function computeVoteResults(gameRef, data) {
-  const votes = data.meeting?.votes || {};
-  const tally = {};
-
-  Object.values(votes).forEach(v => {
-    if (v !== 'skip') tally[v] = (tally[v] || 0) + 1;
-  });
-
-  let maxVotes = 0;
-  let eliminated = null;
-  let tie = false;
-
-  Object.entries(tally).forEach(([uid, count]) => {
-    if (count > maxVotes) { maxVotes = count; eliminated = uid; tie = false; }
-    else if (count === maxVotes) { tie = true; }
-  });
-
-  if (tie) eliminated = null;
-
-  const updates = { status: 'vote_results', 'meeting.eliminated': eliminated, 'meeting.tally': tally };
-  if (eliminated) {
-    updates[`players.${eliminated}.alive`] = false;
-  }
-
-  await updateDoc(gameRef, updates);
-
-  // Vérifier condition de victoire après vote
-  const snap = await getDoc(gameRef);
-  checkWinCondition(snap.data());
+  const votes = data.meeting?.votes||{};
+  const tally={};
+  Object.values(votes).forEach(v=>{ if(v!=='skip') tally[v]=(tally[v]||0)+1; });
+  let max=0, eliminated=null, tie=false;
+  Object.entries(tally).forEach(([uid,c])=>{ if(c>max){max=c;eliminated=uid;tie=false;}else if(c===max)tie=true; });
+  if(tie) eliminated=null;
+  const updates={status:'vote_results','meeting.eliminated':eliminated,'meeting.tally':tally};
+  if(eliminated) updates[`players.${eliminated}.alive`]=false;
+  await updateDoc(gameRef,updates);
+  const snap2=await getDoc(gameRef);
+  checkWin(snap2.data());
 }
 
-// ===== RÉSULTATS DU VOTE =====
 function showVoteResults(data, players) {
   showScreen('screen-results');
-  const meeting = data.meeting || {};
-  const eliminated = meeting.eliminated;
-  const tally = meeting.tally || {};
-  const el = document.getElementById('results-content');
-
-  let html = '';
-
+  const {eliminated,tally={}}=data.meeting||{};
+  const totalVotes=Object.values(tally).reduce((a,b)=>a+b,0);
+  let html='';
   if (!eliminated) {
-    html += `<div class="card" style="text-align:center;padding:24px">
-      <span style="font-size:48px">🤝</span>
-      <div style="font-size:20px;font-weight:800;margin-top:12px">Égalité !</div>
-      <div style="color:var(--text2);margin-top:6px">Personne n'est éliminé</div>
-    </div>`;
+    html=`<div class="card" style="text-align:center;padding:24px"><span style="font-size:48px">🤝</span><div style="font-size:20px;font-weight:800;margin-top:12px">Égalité !</div><div style="color:var(--text2);margin-top:6px">Personne n'est éliminé</div></div>`;
   } else {
-    const p = players[eliminated];
-    const role = p ? (ROLES[p.role] || ROLES.innocent) : { name: '?', icon: '❓' };
-    html += `<div class="card" style="text-align:center;padding:24px">
-      <span style="font-size:48px">${role.icon}</span>
-      <div style="font-size:20px;font-weight:800;margin-top:12px">${p?.name || '?'} est éliminé !</div>
-      <div style="color:var(--text2);margin-top:6px">Rôle : ${role.name}</div>
-    </div>`;
+    const p=players[eliminated]; const role=ROLES[p?.role]||ROLES.innocent;
+    html=`<div class="card" style="text-align:center;padding:24px"><span style="font-size:48px">${role.icon}</span><div style="font-size:20px;font-weight:800;margin-top:12px">${p?.name||'?'} est éliminé !</div><div style="color:var(--text2);margin-top:6px">Rôle : ${role.name}</div></div>`;
   }
-
-  html += '<div class="section-title" style="margin-top:16px">Décompte des votes</div>';
-  Object.values(players).forEach((p, i) => {
-    const count = tally[p.uid] || 0;
-    const pct = count > 0 && Object.values(tally).reduce((a,b)=>a+b,0) > 0
-      ? Math.round(count / Object.values(tally).reduce((a,b)=>a+b,0) * 100) : 0;
-    html += `<div class="card">
-      <div style="display:flex;align-items:center;gap:10px">
-        <div class="player-avatar ${getColor(p.colorIdx ?? i)}" style="width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;flex-shrink:0">${getInitial(p.name)}</div>
-        <div style="flex:1">
-          <div style="font-weight:700">${p.name}</div>
-          <div class="result-bar" style="width:${pct}%"></div>
-        </div>
-        <div style="font-weight:800;font-size:18px">${count}</div>
-      </div>
-    </div>`;
+  html+='<div class="section-title" style="margin-top:16px">Votes</div>';
+  Object.values(players).forEach((p,i)=>{
+    const c=tally[p.uid]||0, pct=totalVotes>0?Math.round(c/totalVotes*100):0;
+    html+=`<div class="card"><div style="display:flex;align-items:center;gap:10px">
+      <div class="player-avatar ${getColor(p.colorIdx??i)}" style="width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;flex-shrink:0">${getInitial(p.name)}</div>
+      <div style="flex:1"><div style="font-weight:700">${p.name}</div><div class="result-bar" style="width:${pct}%"></div></div>
+      <div style="font-weight:800;font-size:18px">${c}</div></div></div>`;
   });
-
-  el.innerHTML = html;
+  document.getElementById('results-content').innerHTML=html;
 }
 
 window.resumeGame = async () => {
-  const gameRef = doc(db, 'games', state.gameId);
-  const snap = await getDoc(gameRef);
-  const data = snap.data();
-
-  // Vérifier condition avant de reprendre
-  if (checkWinCondition(data)) return;
-
-  await updateDoc(gameRef, { status: 'playing' });
+  const snap=await getDoc(doc(db,'games',state.gameId));
+  if(!checkWin(snap.data())) await updateDoc(doc(db,'games',state.gameId),{status:'playing'});
 };
 
-// ===== CONDITION DE VICTOIRE =====
-async function checkWinCondition(data) {
-  const players = data.players || {};
-  const alivePlayers = Object.values(players).filter(p => p.alive);
-  const aliveImpostors = alivePlayers.filter(p => p.role === 'impostor');
-  const aliveInnocents = alivePlayers.filter(p => p.role !== 'impostor');
-
-  // Imposteurs gagnent si égalité numérique
-  if (aliveImpostors.length >= aliveInnocents.length) {
-    await updateDoc(doc(db, 'games', state.gameId), {
-      status: 'ended',
-      endReason: 'impostor_majority',
-      winner: 'impostors',
-    });
+async function checkWin(data) {
+  const players=Object.values(data.players||{});
+  const alive=players.filter(p=>p.alive);
+  const aliveImpostors=alive.filter(p=>p.role==='impostor');
+  const aliveInnocents=alive.filter(p=>p.role!=='impostor');
+  if (aliveImpostors.length>=aliveInnocents.length) {
+    await updateDoc(doc(db,'games',state.gameId),{status:'ended',endReason:'impostor_majority',winner:'impostors'});
     return true;
   }
-
-  // Innocents gagnent si plus d'imposteurs
-  if (aliveImpostors.length === 0) {
-    await updateDoc(doc(db, 'games', state.gameId), {
-      status: 'ended',
-      endReason: 'impostors_eliminated',
-      winner: 'innocents',
-    });
+  if (aliveImpostors.length===0) {
+    await updateDoc(doc(db,'games',state.gameId),{status:'ended',endReason:'impostors_eliminated',winner:'innocents'});
     return true;
   }
-
   return false;
 }
 
-// ===== FIN DE PARTIE =====
 function showEndScreen(data, players) {
-  if (timerInterval) clearInterval(timerInterval);
+  if(timerInterval) clearInterval(timerInterval);
   document.getElementById('admin-btn').classList.remove('visible');
   showScreen('screen-end');
-
-  const winner = data.winner;
-  const reason = data.endReason;
-
-  const titles = {
-    innocents: { emoji: '🏆', title: 'Les Innocents gagnent !', sub: reason === 'tasks_complete' ? 'Toutes les tâches ont été complétées.' : 'Tous les imposteurs ont été éliminés.' },
-    impostors: { emoji: '💀', title: 'Les Imposteurs gagnent !', sub: reason === 'timeout' ? 'Le temps est écoulé.' : 'Ils sont trop nombreux pour être arrêtés.' },
-  };
-
-  const r = titles[winner] || titles.innocents;
-  document.getElementById('end-emoji').textContent = r.emoji;
-  document.getElementById('end-title').textContent = r.title;
-  document.getElementById('end-sub').textContent = r.sub;
-
-  // Révéler les rôles
-  const el = document.getElementById('end-roles-list');
-  el.innerHTML = Object.values(players).map((p, i) => {
-    const role = ROLES[p.role] || ROLES.innocent;
+  const w=data.winner, r=data.endReason;
+  const cfg={
+    innocents:{emoji:'🏆',title:'Les Innocents gagnent !',sub:r==='tasks_complete'?'Toutes les tâches complétées.':'Tous les imposteurs éliminés.'},
+    impostors:{emoji:'💀',title:'Les Imposteurs gagnent !',sub:r==='timeout'?'Le temps est écoulé.':'Trop nombreux pour être arrêtés.'},
+    none:{emoji:'🏁',title:'Partie terminée','sub':'L\'organisateur a mis fin à la partie.'}
+  }[w]||{emoji:'🏁',title:'Fin',sub:''};
+  document.getElementById('end-emoji').textContent=cfg.emoji;
+  document.getElementById('end-title').textContent=cfg.title;
+  document.getElementById('end-sub').textContent=cfg.sub;
+  document.getElementById('end-roles-list').innerHTML=Object.values(players).map((p,i)=>{
+    const role=ROLES[p.role]||ROLES.innocent;
     return `<div class="player-item">
-      <div class="player-avatar ${getColor(p.colorIdx ?? i)}">${getInitial(p.name)}</div>
-      <div class="player-info">
-        <div class="player-name">${p.name}</div>
-        <div class="player-status">${role.icon} ${role.name}</div>
-      </div>
-      <span class="player-badge ${p.alive ? 'badge-alive' : 'badge-dead'}">${p.alive ? 'SURVÉCU' : 'ÉLIMINÉ'}</span>
+      <div class="player-avatar ${getColor(p.colorIdx??i)}">${getInitial(p.name)}</div>
+      <div class="player-info"><div class="player-name">${p.name}</div><div class="player-status">${role.icon} ${role.name}</div></div>
+      <span class="player-badge ${p.alive?'badge-alive':'badge-dead'}">${p.alive?'SURVÉCU':'ÉLIMINÉ'}</span>
     </div>`;
   }).join('');
 }
 
 // ===== ADMIN =====
 window.openAdminModal  = () => openModal('admin-modal');
-window.closeAdminModal = () => closeModal('admin-modal');
-
 window.adminForceMeeting = async () => {
-  await updateDoc(doc(db, 'games', state.gameId), {
-    status: 'meeting',
-    meeting: { type: 'emergency', calledBy: 'admin', votes: {} },
-  });
+  await updateDoc(doc(db,'games',state.gameId),{status:'meeting',meeting:{type:'emergency',calledBy:'admin',votes:{}}});
   closeModal('admin-modal');
 };
-
 window.adminEndGame = async () => {
-  if (!confirm('Terminer la partie maintenant ?')) return;
-  await updateDoc(doc(db, 'games', state.gameId), {
-    status: 'ended',
-    endReason: 'admin_stop',
-    winner: 'none',
-  });
+  if(!confirm('Terminer la partie ?')) return;
+  await updateDoc(doc(db,'games',state.gameId),{status:'ended',endReason:'admin_stop',winner:'none'});
   closeModal('admin-modal');
 };
-
-// ===== Écoute des changements de statut pour joueurs non-orga =====
-// Le onSnapshot principal gère déjà tout via subscribeToGame()
-// Mais on doit aussi écouter quand un joueur mort est en écran mort
-// → déjà géré par le snapshot global
-
 </script>
 </body>
 </html>

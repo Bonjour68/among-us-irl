@@ -842,9 +842,18 @@ const ROLES = {
 };
 
 // ===== INIT AUTH =====
+let authReady = false;
 signInAnonymously(auth).then(cred => {
   state.uid = cred.user.uid;
+  authReady = true;
+  // Afficher un indicateur visuel que l'app est prête
+  document.querySelectorAll('.btn-primary').forEach(b => b.style.opacity = '1');
 }).catch(e => showToast('Erreur de connexion : ' + e.message));
+
+// Griser les boutons pendant le chargement
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.btn-primary').forEach(b => b.style.opacity = '0.6');
+});
 
 // ===== UTILITAIRES =====
 window.showScreen = (id) => {
@@ -872,7 +881,16 @@ const getInitial = (name) => name.charAt(0).toUpperCase();
 window.createGame = async () => {
   const name = document.getElementById('create-name').value.trim();
   if (!name) return showToast('Entre ton prénom !');
-  if (!state.uid) return showToast('Connexion en cours, réessaie…');
+  // Attendre auth si pas encore prête
+  if (!state.uid) {
+    showToast('Connexion en cours…');
+    try {
+      const cred = await signInAnonymously(auth);
+      state.uid = cred.user.uid;
+    } catch(e) {
+      return showToast('Erreur : ' + e.message);
+    }
+  }
 
   const code = genCode();
   const gameId = code;
@@ -923,7 +941,15 @@ window.joinGame = async () => {
   const name = document.getElementById('join-name').value.trim();
   if (!code || code.length !== 6) return showToast('Code invalide (6 caractères)');
   if (!name) return showToast('Entre ton prénom !');
-  if (!state.uid) return showToast('Connexion en cours, réessaie…');
+  if (!state.uid) {
+    showToast('Connexion en cours…');
+    try {
+      const cred = await signInAnonymously(auth);
+      state.uid = cred.user.uid;
+    } catch(e) {
+      return showToast('Erreur : ' + e.message);
+    }
+  }
 
   const gameRef = doc(db, 'games', code);
   const snap = await getDoc(gameRef);
